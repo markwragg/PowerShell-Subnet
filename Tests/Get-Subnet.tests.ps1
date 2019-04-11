@@ -95,9 +95,21 @@ Describe "Get-Subnet PS$PSVersion" {
 
     Context 'Network class identification' {
         $TestCases = @(
-            @{'IP' = '0.1.2.3'; 'Class' = 'A' }
-            @{'IP' = '128.1.2.3'; 'Class' = 'B' }
-            @{'IP' = '192.1.2.3'; 'Class' = 'C' }
+            @{'IP' = '0.1.2.3'; 'Class' = 'A'; 'SubnetMask' = '255.0.0.0' }
+            @{'IP' = '128.1.2.3'; 'Class' = 'B'; 'SubnetMask' = '255.255.0.0' }
+            @{'IP' = '192.1.2.3'; 'Class' = 'C'; 'SubnetMask' = '255.255.255.0' }
+        )
+
+        It "Should identify <IP> as <Class> with Mask <SubnetMask>" -TestCases $TestCases {
+            param($IP, $Class, $SubnetMask)
+
+            $Result = (Get-Subnet -IP $IP)
+
+            $Result.NetworkClass | Should -Be $Class
+            $Result.SubnetMask | Should -Be $SubnetMask
+        }
+
+        $TestCases = @(
             @{'IP' = '224.1.2.3'; 'Class' = 'D' }
             @{'IP' = '240.1.2.3'; 'Class' = 'E' }
         )
@@ -105,7 +117,9 @@ Describe "Get-Subnet PS$PSVersion" {
         It "Should identify <IP> as <Class>" -TestCases $TestCases {
             param($IP, $Class)
 
-            (Get-Subnet -IP $IP -MaskBits 24).NetworkClass | Should -BeExactly $Class
+            $Result = (Get-Subnet -IP $IP -MaskBits 24)
+
+            $Result.NetworkClass | Should -Be $Class
         }
     }
 
