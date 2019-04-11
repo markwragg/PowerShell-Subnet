@@ -46,12 +46,12 @@ function Get-Subnet {
             
         }
         
-        If ($null -eq $MaskBits) {
+        If ($MaskBits -isnot [int]) {
             $MaskBits = Switch ($Class) {
                 'A' { 8 }
                 'B' { 16 }
                 'C' { 24 }
-                default { Throw 'Subnet mask size was not specified and could not be inferred.' }
+                default { Throw "Subnet mask size was not specified and could not be inferred because the address is Class $Class." }
             }
 
             Write-Warning "Subnet mask size was not specified. Using default subnet size for a Class $Class network of /$MaskBits."
