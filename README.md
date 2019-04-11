@@ -1,6 +1,6 @@
 # PowerShell-Subnet
 
-[![Build status](https://ci.appveyor.com/api/projects/status/xbxvp561gqw4knq4?svg=true)](https://ci.appveyor.com/project/markwragg/powershell-subnet) ![Test Coverage](https://img.shields.io/badge/coverage-76%25-yellow.svg?maxAge=60)
+[![Build status](https://ci.appveyor.com/api/projects/status/xbxvp561gqw4knq4?svg=true)](https://ci.appveyor.com/project/markwragg/powershell-subnet) ![Test Coverage](https://img.shields.io/badge/coverage-83%25-yellow.svg?maxAge=60)
 
 A PowerShell module for cmdlets related to network subnet calculations.
 
