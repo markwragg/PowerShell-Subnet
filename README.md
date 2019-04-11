@@ -1,6 +1,6 @@
 # PowerShell-Subnet
 
-[![Build status](https://ci.appveyor.com/api/projects/status/xbxvp561gqw4knq4?svg=true)](https://ci.appveyor.com/project/markwragg/powershell-subnet) ![Test Coverage](https://img.shields.io/badge/coverage-83%25-yellow.svg?maxAge=60)
+[![Build status](https://ci.appveyor.com/api/projects/status/xbxvp561gqw4knq4?svg=true)](https://ci.appveyor.com/project/markwragg/powershell-subnet) ![Test Coverage](https://img.shields.io/badge/coverage-76%25-yellow.svg?maxAge=60)
 
 A PowerShell module for cmdlets related to network subnet calculations.
 
@@ -11,3 +11,55 @@ The module is published in the PSGallery, so if you have PowerShell 5 can be ins
 ```powershell
 Install-Module Subnet -Scope CurrentUser
 ```
+
+## Usage
+
+Get the subnet details for a specified network address and mask using slash notation:
+
+```powershell
+Get-Subnet 192.168.4.56/24
+```
+
+Result:
+
+```powershell
+IPAddress        : 192.168.4.56
+MaskBits         : 24
+NetworkAddress   : 192.168.4.0
+BroadcastAddress : 192.168.4.255
+SubnetMask       : 255.255.255.0
+NetworkClass     : C
+Range            : 192.168.4.0 ~ 192.168.4.255
+HostAddresses    : {192.168.4.1, 192.168.4.2, 192.168.4.3, 192.168.4.4...}
+```
+
+Get the subnet details for a specified network address and mask, as specified via the `-MaskBits` parameter:
+
+```powershell
+Get-Subnet -IP 192.168.4.56 -MaskBits 20
+```
+
+Result:
+
+```powershell
+IPAddress        : 192.168.4.56
+MaskBits         : 20
+NetworkAddress   : 192.168.0.0
+BroadcastAddress : 192.168.15.255
+SubnetMask       : 255.255.240.0
+NetworkClass     : C
+Range            : 192.168.0.0 ~ 192.168.15.255
+HostAddresses    : {192.168.0.1, 192.168.0.2, 192.168.0.3, 192.168.0.4...}
+```
+
+Get the subnet details for the current local network IP:
+
+```powershell
+Get-Subnet
+```
+
+## Other Features
+
+- If the subnet size specified is larger than a /16, the cmdlet will not return the host addresses by default, and instead warn that this would take some time.
+If you want to force the return of host addresses for these subnets, use `-Force`.
+- If no subnet mask size is specified, the cmdlet will use the default size for the class of address, and show a warning that it has done so.
