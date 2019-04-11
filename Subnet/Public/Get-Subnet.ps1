@@ -21,7 +21,7 @@ function Get-Subnet {
             (([math]::truncate($int / 16777216)).tostring() + "." + ([math]::truncate(($int % 16777216) / 65536)).tostring() + "." + ([math]::truncate(($int % 65536) / 256)).tostring() + "." + ([math]::truncate($int % 256)).tostring() )
         } 
 
-        If (-not $IP -and -not $MaskBits) { 
+        If (-not $IP) { 
             $LocalIP = (Get-NetIPAddress | Where-Object {$_.AddressFamily -eq 'IPv4' -and $_.PrefixOrigin -ne 'WellKnown'})
 
             $IP = $LocalIP.IPAddress
@@ -46,7 +46,7 @@ function Get-Subnet {
             
         }
         
-        If (-not $MaskBits) {
+        If ($null -eq $MaskBits) {
             $MaskBits = Switch ($Class) {
                 'A' { 8 }
                 'B' { 16 }

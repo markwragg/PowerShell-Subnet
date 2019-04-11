@@ -8,7 +8,7 @@ $Module = 'Subnet'
 
 Describe "Get-Subnet PS$PSVersion" {
 
-    It 'Should calculate a subnet IP with mask' {
+    It 'Should calculate a Subnet IP with mask' {
 
         $Result = Get-Subnet -IP 1.2.3.4/24
         
@@ -22,7 +22,7 @@ Describe "Get-Subnet PS$PSVersion" {
         $Result.HostAddresses | Should -HaveCount 254
     }
 
-    It 'Should calculate a subnet IP with mask declared separately' {
+    It 'Should calculate a Subnet IP with mask declared separately' {
 
         $Result = Get-Subnet -IP 1.2.3.4 -Mask 24
         
@@ -36,7 +36,7 @@ Describe "Get-Subnet PS$PSVersion" {
         $Result.HostAddresses | Should -HaveCount 254
     }
 
-    It 'Should calculate the subnet of the local NIC IP' {
+    It 'Should calculate the Subnet of the local NIC IP' {
 
         $Result = Get-Subnet
 
@@ -47,5 +47,72 @@ Describe "Get-Subnet PS$PSVersion" {
         $Result.BroadcastAddress | Should -Not -Be $null
         $Result.NetworkClass | Should -Not -Be $null
         $Result.Range | Should -Not -Be $null
+    }
+
+    Context 'CIDR to Subnet conversions' {
+        $TestCases = @(
+            @{'CIDR' = 0; 'Subnet' = '0.0.0.0' }
+            @{'CIDR' = 1; 'Subnet' = '128.0.0.0' }
+            @{'CIDR' = 2; 'Subnet' = '192.0.0.0' }
+            @{'CIDR' = 3; 'Subnet' = '224.0.0.0' }
+            @{'CIDR' = 4; 'Subnet' = '240.0.0.0' }
+            @{'CIDR' = 5; 'Subnet' = '248.0.0.0' }
+            @{'CIDR' = 6; 'Subnet' = '252.0.0.0' }
+            @{'CIDR' = 7; 'Subnet' = '254.0.0.0' }
+            @{'CIDR' = 8; 'Subnet' = '255.0.0.0' }
+            @{'CIDR' = 9; 'Subnet' = '255.128.0.0' }
+            @{'CIDR' = 10; 'Subnet' = '255.192.0.0' }
+            @{'CIDR' = 11; 'Subnet' = '255.224.0.0' }
+            @{'CIDR' = 12; 'Subnet' = '255.240.0.0' }
+            @{'CIDR' = 13; 'Subnet' = '255.248.0.0' }
+            @{'CIDR' = 14; 'Subnet' = '255.252.0.0' }
+            @{'CIDR' = 15; 'Subnet' = '255.254.0.0' }
+            @{'CIDR' = 16; 'Subnet' = '255.255.0.0' }
+            @{'CIDR' = 17; 'Subnet' = '255.255.128.0' }
+            @{'CIDR' = 18; 'Subnet' = '255.255.192.0' }
+            @{'CIDR' = 19; 'Subnet' = '255.255.224.0' }
+            @{'CIDR' = 20; 'Subnet' = '255.255.240.0' }
+            @{'CIDR' = 21; 'Subnet' = '255.255.248.0' }
+            @{'CIDR' = 22; 'Subnet' = '255.255.252.0' }
+            @{'CIDR' = 23; 'Subnet' = '255.255.254.0' }
+            @{'CIDR' = 24; 'Subnet' = '255.255.255.0' }
+            @{'CIDR' = 25; 'Subnet' = '255.255.255.128' }
+            @{'CIDR' = 26; 'Subnet' = '255.255.255.192' }
+            @{'CIDR' = 27; 'Subnet' = '255.255.255.224' }
+            @{'CIDR' = 28; 'Subnet' = '255.255.255.240' }
+            @{'CIDR' = 29; 'Subnet' = '255.255.255.248' }
+            @{'CIDR' = 30; 'Subnet' = '255.255.255.252' }
+            @{'CIDR' = 31; 'Subnet' = '255.255.255.254' }
+            @{'CIDR' = 32; 'Subnet' = '255.255.255.255' }
+        )
+
+        It "Should convert /<CIDR> to <Subnet>" -TestCases $TestCases {
+            param($CIDR, $Subnet)
+
+            (Get-Subnet -IP 10.1.2.3 -MaskBits $CIDR).SubnetMask | Should -BeExactly $Subnet
+        }
+    }
+
+    Context 'Network class identification' {
+        $TestCases = @(
+            @{'IP' = '0.1.2.3'; 'Class' = 'A' }
+            @{'IP' = '128.1.2.3'; 'Class' = 'B' }
+            @{'IP' = '192.1.2.3'; 'Class' = 'C' }
+            @{'IP' = '224.1.2.3'; 'Class' = 'D' }
+            @{'IP' = '240.1.2.3'; 'Class' = 'E' }
+        )
+
+        It "Should identify <IP> as <Class>" -TestCases $TestCases {
+            param($IP, $Class)
+
+            (Get-Subnet -IP $IP -MaskBits 24).NetworkClass | Should -BeExactly $Class
+        }
+    }
+
+    Context 'Invalid IP' {
+        
+        It "Should throw for an invalid IP" {
+            { Get-Subnet -IP 300.1.2.3 } | Should -Throw
+        }
     }
 }
