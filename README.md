@@ -31,6 +31,7 @@ SubnetMask       : 255.255.255.0
 NetworkClass     : C
 Range            : 192.168.4.0 ~ 192.168.4.255
 HostAddresses    : {192.168.4.1, 192.168.4.2, 192.168.4.3, 192.168.4.4...}
+HostAddressCount : 254
 ```
 
 Get the subnet details for a specified network address and mask, as specified via the `-MaskBits` parameter:
@@ -50,6 +51,7 @@ SubnetMask       : 255.255.240.0
 NetworkClass     : C
 Range            : 192.168.0.0 ~ 192.168.15.255
 HostAddresses    : {192.168.0.1, 192.168.0.2, 192.168.0.3, 192.168.0.4...}
+HostAddressCount : 4094
 ```
 
 Get the subnet details for the current local network IP:
