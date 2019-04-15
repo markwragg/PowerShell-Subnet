@@ -1,4 +1,4 @@
-Function Test-PrivateIP {
+function Test-PrivateIP {
     <#
         .SYNOPSIS
             Use to determine if a given IP address is within the IPv4 private address space ranges.
@@ -11,15 +11,22 @@ Function Test-PrivateIP {
 
         .EXAMPLE
             Test-PrivateIP -IP 172.16.1.2
+
+        .EXAMPLE
+            '10.1.2.3' | Test-PrivateIP
     #>
     param(
-        [string]$IP
+        [parameter(Mandatory,ValueFromPipeline)]
+        [string]
+        $IP
     )
+    process {
 
-    if ($IP -Match '(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)') {
-        $true
-    }
-    else {
-        $false
-    }
+        if ($IP -Match '(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)') {
+            $true
+        }
+        else {
+            $false
+        }
+    }    
 }

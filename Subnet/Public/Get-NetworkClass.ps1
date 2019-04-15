@@ -1,4 +1,4 @@
-Function Get-NetworkClass {
+function Get-NetworkClass {
     <#
         .SYNOPSIS
             Use to determine the network class of a given IP address.
@@ -11,16 +11,23 @@ Function Get-NetworkClass {
 
         .EXAMPLE
             Get-NetworkClass -IP 172.16.1.2
+
+        .EXAMPLE
+            '10.1.1.1' | Get-NetworkClass
     #>
     param(
-        [string]$IP
+        [parameter(Mandatory,ValueFromPipeline)]
+        [string]
+        $IP
     )
+    process {
 
-    Switch ($IP.Split('.')[0]) {
-        { $_ -in 0..127 } { 'A' }
-        { $_ -in 128..191 } { 'B' }
-        { $_ -in 192..223 } { 'C' }
-        { $_ -in 224..239 } { 'D' }
-        { $_ -in 240..255 } { 'E' }
+        switch ($IP.Split('.')[0]) {
+            { $_ -in 0..127 } { 'A' }
+            { $_ -in 128..191 } { 'B' }
+            { $_ -in 192..223 } { 'C' }
+            { $_ -in 224..239 } { 'D' }
+            { $_ -in 240..255 } { 'E' }
+        }
     }
 }
