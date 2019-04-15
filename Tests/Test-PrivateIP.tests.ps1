@@ -6,7 +6,7 @@ $Module = 'Subnet'
 
 Import-Module "$Root/$Module/$Module.psd1" -Force
 
-Describe 'Test-PrivateIP' {
+Describe "Test-PrivateIP PS$PSVersion" {
 
     Context 'Private IPs' {
 

@@ -6,7 +6,7 @@ $Module = 'Subnet'
 
 Import-Module "$Root/$Module/$Module.psd1" -Force
 
-Describe 'Get-NetworkClass' {
+Describe "Get-NetworkClass PS$PSVersion" {
 
     Context 'Class A IPs' {
 
