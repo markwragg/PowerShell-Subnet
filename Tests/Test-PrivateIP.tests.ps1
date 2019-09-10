@@ -4,6 +4,7 @@ $PSVersion = $PSVersionTable.PSVersion.Major
 $Root = "$PSScriptRoot/.."
 $Module = 'Subnet'
 
+Get-Module $Module | Remove-Module -Force
 Import-Module "$Root/$Module/$Module.psd1" -Force
 
 Describe "Test-PrivateIP PS$PSVersion" {

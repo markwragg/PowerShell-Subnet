@@ -12,8 +12,9 @@ function Test-PrivateIP {
         .EXAMPLE
             Test-PrivateIP -IP 172.16.1.2
 
-        .EXAMPLE
-            '10.1.2.3' | Test-PrivateIP
+            Result
+            ------
+            True
     #>
     param(
         [parameter(Mandatory,ValueFromPipeline)]

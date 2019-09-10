@@ -12,8 +12,16 @@ function Get-NetworkClass {
         .EXAMPLE
             Get-NetworkClass -IP 172.16.1.2
 
+            Result
+            ------
+            B
+
         .EXAMPLE
             '10.1.1.1' | Get-NetworkClass
+
+            Result
+            ------
+            A
     #>
     param(
         [parameter(Mandatory,ValueFromPipeline)]

@@ -4,6 +4,7 @@ $PSVersion = $PSVersionTable.PSVersion.Major
 $Root = "$PSScriptRoot\.."
 $Module = 'Subnet'
 
+Get-Module $Module | Remove-Module -Force
 Describe "Subnet Module Tests PS$PSVersion" {
   
     It "Should import $Module without errors" {
