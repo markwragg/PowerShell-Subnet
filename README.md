@@ -22,7 +22,7 @@ Get-Subnet 192.168.4.56/24
 
 Result:
 
-```powershell
+```text
 IPAddress        : 192.168.4.56
 MaskBits         : 24
 NetworkAddress   : 192.168.4.0
@@ -42,7 +42,7 @@ Get-Subnet -IP 192.168.4.56 -MaskBits 20
 
 Result:
 
-```powershell
+```text
 IPAddress        : 192.168.4.56
 MaskBits         : 20
 NetworkAddress   : 192.168.0.0
