@@ -95,19 +95,29 @@ function Get-Subnet {
         $MaskAddr = [ipaddress]::Parse((Convert-Int64toIP -int ([convert]::ToInt64(("1" * $Mask + "0" * (32 - $Mask)), 2))))        
         $NetworkAddr = [ipaddress]($MaskAddr.address -band $IPAddr.address) 
         $BroadcastAddr = [ipaddress](([ipaddress]::parse("255.255.255.255").address -bxor $MaskAddr.address -bor $NetworkAddr.address))
+        $Range = "$NetworkAddr ~ $BroadcastAddr"
         
         $HostStartAddr = (Convert-IPtoInt64 -ip $NetworkAddr.ipaddresstostring) + 1
         $HostEndAddr = (Convert-IPtoInt64 -ip $broadcastaddr.ipaddresstostring) - 1
 
-        $HostAddressCount = ($HostEndAddr - $HostStartAddr) + 1
-        
         if ($Mask -ge 16 -or $Force) {
             
             Write-Progress "Calcualting host addresses for $NetworkAddr/$Mask.."
+            if ($Mask -ge 31) {
+                $HostAddresses = ,$NetworkAddr
+                if ($Mask -eq 31) {
+                    $HostAddresses += $BroadcastAddr
+                }
 
-            $HostAddresses = for ($i = $HostStartAddr; $i -le $HostEndAddr; $i++) {
-                Convert-Int64toIP -int $i
-            }
+                $HostAddressCount = $HostAddresses.Length
+                $NetworkAddr = $null
+                $BroadcastAddr = $null
+            } else {
+                $HostAddresses = for ($i = $HostStartAddr; $i -le $HostEndAddr; $i++) {
+                    Convert-Int64toIP -int $i
+                }
+                $HostAddressCount = ($HostEndAddr - $HostStartAddr) + 1
+            }                     
         }
         else {
             Write-Warning "Host address enumeration was not performed because it would take some time for a /$Mask subnet. `nUse -Force if you want it to occur."
@@ -120,7 +130,7 @@ function Get-Subnet {
             BroadcastAddress = $broadcastaddr
             SubnetMask       = $MaskAddr
             NetworkClass     = $Class
-            Range            = "$networkaddr ~ $broadcastaddr"
+            Range            = $Range
             HostAddresses    = $HostAddresses
             HostAddressCount = $HostAddressCount
         }
