@@ -104,7 +104,11 @@ function Get-Subnet {
             
             Write-Progress "Calcualting host addresses for $NetworkAddr/$Mask.."
             if ($Mask -ge 31) {
-                $HostAddresses = $Mask -eq 32 ? $NetworkAddr : $NetworkAddr,$BroadcastAddr
+                $HostAddresses = ,$NetworkAddr
+                if ($Mask -eq 31) {
+                    $HostAddresses += $BroadcastAddr
+                }
+
                 $HostAddressCount = $HostAddresses.Length
                 $NetworkAddr = $null
                 $BroadcastAddr = $null
