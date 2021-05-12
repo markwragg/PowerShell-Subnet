@@ -38,6 +38,34 @@ Describe "Get-Subnet PS$PSVersion" {
             $Result.Range | Should -Be '1.2.3.0 ~ 1.2.3.255'
             $Result.HostAddresses | Should -HaveCount 254
         }
+
+        It 'Should calculate a Subnet IP for a /31' {
+    
+            $Result = Get-Subnet -IP 1.2.3.4/31
+            
+            $Result | Should -BeOfType [pscustomobject]
+            $Result.IPAddress | Should -Be '1.2.3.4'
+            $Result.MaskBits | Should -Be 31
+            $Result.NetworkAddress | Should -Be $null
+            $Result.BroadcastAddress | Should -Be $null
+            $Result.NetworkClass | Should -Be 'A'
+            $Result.Range | Should -Be '1.2.3.4 ~ 1.2.3.5'
+            $Result.HostAddresses | Should -HaveCount 2
+        }
+
+        It 'Should calculate a Subnet IP for a /32' {
+    
+            $Result = Get-Subnet -IP 1.2.3.4/32
+            
+            $Result | Should -BeOfType [pscustomobject]
+            $Result.IPAddress | Should -Be '1.2.3.4'
+            $Result.MaskBits | Should -Be 32
+            $Result.NetworkAddress | Should -Be $null
+            $Result.BroadcastAddress | Should -Be $null
+            $Result.NetworkClass | Should -Be 'A'
+            $Result.Range | Should -Be '1.2.3.4 ~ 1.2.3.4'
+            $Result.HostAddresses | Should -HaveCount 1
+        }
     
         #skipped for ci/cd
         It 'Should calculate the Subnet of the local NIC IP' -Skip {
