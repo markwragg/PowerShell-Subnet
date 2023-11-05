@@ -1,6 +1,6 @@
 # PowerShell-Subnet
 
-[![Build Status](https://dev.azure.com/markwragg/GitHub/_apis/build/status/markwragg.PowerShell-Subnet?branchName=master)](https://dev.azure.com/markwragg/GitHub/_build/latest?definitionId=10&branchName=master) ![Test Coverage](https://img.shields.io/badge/Test Coverage-91%25-brightgreen.svg)
+[![Build Status](https://dev.azure.com/markwragg/GitHub/_apis/build/status/markwragg.PowerShell-Subnet?branchName=master)](https://dev.azure.com/markwragg/GitHub/_build/latest?definitionId=10&branchName=master) ![coverage](https://img.shields.io/badge/coverage-95%25-brightgreen.svg)
 
 A PowerShell module for cmdlets related to network subnet calculations.
 

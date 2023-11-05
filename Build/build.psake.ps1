@@ -164,7 +164,7 @@ Task 'Test' -Depends 'ImportStagingModule' {
     $CodeCoverage = [Math]::floor($TestResults.CodeCoverage.CoveragePercent)
 
     #Update readme.md with Code Coverage result
-    Set-ShieldsIoBadge -Path (Join-Path $ProjectRoot 'README.md') -Subject 'Test Coverage' -Status $CodeCoverage -AsPercentage
+    Set-ShieldsIoBadge -Path (Join-Path $ProjectRoot 'README.md') -Subject 'coverage' -Status $CodeCoverage -AsPercentage
 }
 
 
