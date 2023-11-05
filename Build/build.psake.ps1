@@ -161,8 +161,10 @@ Task 'Test' -Depends 'ImportStagingModule' {
         Write-Error "Failed '$($TestResults.FailedCount)' tests, build failed"
     }
 
+    $CodeCoverage = [Math]::floor($TestResults.CodeCoverage.CoveragePercent)
+
     #Update readme.md with Code Coverage result
-    Set-ShieldsIoBadge -Path (Join-Path $ProjectRoot 'README.md') -Subject 'Test Coverage' -Status [int]$TestResults.CodeCoverage.CoveragePercent -AsPercentage
+    Set-ShieldsIoBadge -Path (Join-Path $ProjectRoot 'README.md') -Subject 'Test Coverage' -Status $CodeCoverage -AsPercentage
 }
 
 
