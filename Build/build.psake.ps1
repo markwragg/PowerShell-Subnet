@@ -162,9 +162,7 @@ Task 'Test' -Depends 'ImportStagingModule' {
     }
 
     #Update readme.md with Code Coverage result
-    $CoveragePercent = [math]::floor(100 - (($TestResults.CodeCoverage.NumberOfCommandsMissed / $TestResults.CodeCoverage.NumberOfCommandsAnalyzed) * 100))
-
-    Set-ShieldsIoBadge -Path (Join-Path $ProjectRoot 'README.md') -Subject 'coverage' -Status $CoveragePercent -AsPercentage
+    Set-ShieldsIoBadge -Path (Join-Path $ProjectRoot 'README.md') -Subject 'coverage' -Status $TestResults.CodeCoverage.CoveragePercent -AsPercentage
 }
 
 
