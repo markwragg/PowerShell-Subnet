@@ -11,15 +11,10 @@ BeforeDiscovery {
         $params | Where-Object { $_.Name -notin $commonParams } | Sort-Object -Property Name -Unique
     }
 
-    $manifest             = Import-PowerShellDataFile -Path $env:BHPSModuleManifest
-    $outputDir            = Join-Path -Path $env:BHProjectPath -ChildPath 'Staging'
-    $outputModDir         = Join-Path -Path $outputDir -ChildPath $env:BHProjectName
-    $outputModVerManifest = Join-Path -Path $outputModDir -ChildPath "$($env:BHProjectName).psd1"
-
     # Get module commands
     # Remove all versions of the module from the session. Pester can't handle multiple versions.
     Get-Module $env:BHProjectName | Remove-Module -Force -ErrorAction Ignore
-    Import-Module -Name $outputModVerManifest -Verbose:$false -ErrorAction Stop
+    Import-Module -Name $PSScriptRoot\..\..\$env:BHProjectName -Verbose:$false -ErrorAction Stop
     $params = @{
         Module      = (Get-Module $env:BHProjectName)
         CommandType = [System.Management.Automation.CommandTypes[]]'Cmdlet, Function' # Not alias
@@ -35,6 +30,7 @@ BeforeDiscovery {
 
 AfterAll {
     Remove-Item Function:/FilterOutCommonParams
+    Get-Module $env:BHProjectName | Remove-Module -Force -ErrorAction Ignore
 }
 
 Describe "Test help for <_.Name>" -ForEach $commands {

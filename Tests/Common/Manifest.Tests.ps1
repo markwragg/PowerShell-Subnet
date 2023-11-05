@@ -1,9 +1,7 @@
 BeforeAll {
     $moduleName         = $env:BHProjectName
     $manifest           = Import-PowerShellDataFile -Path $env:BHPSModuleManifest
-    $outputDir          = Join-Path -Path $ENV:BHProjectPath -ChildPath 'Staging'
-    $outputModDir       = Join-Path -Path $outputDir -ChildPath $env:BHProjectName
-    $outputManifestPath = Join-Path -Path $outputModDir -Child "$($moduleName).psd1"
+    $outputManifestPath = Join-Path -Path $PSScriptRoot\..\..\$env:BHProjectName -Child "$($moduleName).psd1"
     $manifestData       = Test-ModuleManifest -Path $outputManifestPath -Verbose:$false -ErrorAction Stop -WarningAction SilentlyContinue
 
     $changelogPath    = Join-Path -Path $env:BHProjectPath -Child 'CHANGELOG.md'

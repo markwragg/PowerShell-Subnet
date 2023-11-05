@@ -3,10 +3,10 @@ Describe "Get-NetworkClass PS$PSVersion" {
     BeforeAll {
         Import-Module $PSScriptRoot\..\Subnet
 
-        Mock Write-Warning {}
-        Mock Write-Progress {}
+        Mock Write-Warning {} -ModuleName Subnet
+        Mock Write-Progress {} -ModuleName Subnet
     }
-    
+
     Context 'Class A IPs' {
 
         $ClassAIPs = '0.0.0.0', '1.1.1.1', '127.0.0.0'
