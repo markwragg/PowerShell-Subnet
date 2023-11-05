@@ -1,15 +1,11 @@
-if (-not $PSScriptRoot) { $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
-
-$PSVersion = $PSVersionTable.PSVersion.Major
-$Root = "$PSScriptRoot/.."
-$Module = 'Subnet'
-
-Get-Module $Module | Remove-Module -Force
-Import-Module "$Root/$Module/$Module.psd1" -Force
-
 Describe "Get-Subnet PS$PSVersion" {
 
     InModuleScope Subnet {
+
+        BeforeAll {
+            Mock Write-Warning {}
+            Mock Write-Progress {}
+        }
 
         It 'Should calculate a Subnet IP with mask' {
 
