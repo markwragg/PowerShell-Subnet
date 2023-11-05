@@ -162,7 +162,7 @@ Task 'Test' -Depends 'ImportStagingModule' {
     }
 
     #Update readme.md with Code Coverage result
-    Set-ShieldsIoBadge -Path (Join-Path $ProjectRoot 'README.md') -Subject 'coverage' -Status $TestResults.CodeCoverage.CoveragePercent -AsPercentage
+    Set-ShieldsIoBadge -Path (Join-Path $ProjectRoot 'README.md') -Subject 'Test Coverage' -Status $TestResults.CodeCoverage.CoveragePercent -AsPercentage
 }
 
 

@@ -64,7 +64,6 @@ Describe 'Module manifest' {
     }
 }
 
-
 Describe 'Git tagging' -Skip {
     
     BeforeAll {
