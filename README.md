@@ -1,6 +1,6 @@
 # PowerShell-Subnet
 
-[![Build Status](https://dev.azure.com/markwragg/GitHub/_apis/build/status/markwragg.PowerShell-Subnet?branchName=master)](https://dev.azure.com/markwragg/GitHub/_build/latest?definitionId=10&branchName=master) ![Test Coverage](https://img.shields.io/badge/Test Coverage-91.0112359550562%25-lightgrey.svg)
+[![Build Status](https://dev.azure.com/markwragg/GitHub/_apis/build/status/markwragg.PowerShell-Subnet?branchName=master)](https://dev.azure.com/markwragg/GitHub/_build/latest?definitionId=10&branchName=master) ![Test Coverage](https://img.shields.io/badge/Test Coverage-[int][+] Pester.CodeCoverage.CoveragePercent%25-lightgrey.svg)
 
 A PowerShell module for cmdlets related to network subnet calculations.
 
