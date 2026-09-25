@@ -11,7 +11,7 @@ if (-not $env:BHModulePath) { $env:BHModulePath = Join-Path $env:BHProjectPath $
 if (-not $env:BHPSModuleManifest) { $env:BHPSModuleManifest = Join-Path $env:BHModulePath "$env:BHProjectName.psd1" }
 
 # Import module
-if (-not (Get-Module -Name $env:BHProjectName -ListAvailable)) {
+if (-not (Get-Module -Name $env:BHProjectName)) {
     Import-Module -Name $env:BHPSModuleManifest -ErrorAction 'Stop' -Force
 }
 $commands = Get-Command -Module $env:BHProjectName -CommandType Cmdlet, Function -ErrorAction 'Stop' # Not alias
