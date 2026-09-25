@@ -1,7 +1,9 @@
 Describe "Get-Subnet PS$PSVersion" {
 
     BeforeAll {
-        Import-Module $PSScriptRoot\..\Subnet
+        if (-not (Get-Module -Name 'Subnet')) {
+            Import-Module $PSScriptRoot\..\Subnet
+        }
 
         Mock Write-Warning {} -ModuleName Subnet
         Mock Write-Progress {} -ModuleName Subnet
@@ -10,7 +12,7 @@ Describe "Get-Subnet PS$PSVersion" {
     It 'Should calculate a Subnet IP with mask' {
 
         $Result = Get-Subnet -IP 1.2.3.4/24
-            
+
         $Result | Should -BeOfType [pscustomobject]
         $Result.IPAddress | Should -Be '1.2.3.4'
         $Result.MaskBits | Should -Be 24
@@ -20,11 +22,11 @@ Describe "Get-Subnet PS$PSVersion" {
         $Result.Range | Should -Be '1.2.3.0 ~ 1.2.3.255'
         $Result.HostAddresses | Should -HaveCount 254
     }
-    
+
     It 'Should calculate a Subnet IP with mask declared separately' {
-    
+
         $Result = Get-Subnet -IP 1.2.3.4 -Mask 24
-            
+
         $Result | Should -BeOfType [pscustomobject]
         $Result.IPAddress | Should -Be '1.2.3.4'
         $Result.MaskBits | Should -Be 24
@@ -36,9 +38,9 @@ Describe "Get-Subnet PS$PSVersion" {
     }
 
     It 'Should calculate a Subnet IP for a /31' {
-    
+
         $Result = Get-Subnet -IP 1.2.3.4/31
-            
+
         $Result | Should -BeOfType [pscustomobject]
         $Result.IPAddress | Should -Be '1.2.3.4'
         $Result.MaskBits | Should -Be 31
@@ -50,9 +52,9 @@ Describe "Get-Subnet PS$PSVersion" {
     }
 
     It 'Should calculate a Subnet IP for a /32' {
-    
+
         $Result = Get-Subnet -IP 1.2.3.4/32
-            
+
         $Result | Should -BeOfType [pscustomobject]
         $Result.IPAddress | Should -Be '1.2.3.4'
         $Result.MaskBits | Should -Be 32
@@ -62,12 +64,12 @@ Describe "Get-Subnet PS$PSVersion" {
         $Result.Range | Should -Be '1.2.3.4 ~ 1.2.3.4'
         $Result.HostAddresses | Should -HaveCount 1
     }
-    
+
     #skipped for ci/cd
     It 'Should calculate the Subnet of the local NIC IP' -Skip {
-    
+
         $Result = Get-Subnet
-    
+
         $Result | Should -BeOfType [pscustomobject]
         $Result.IPAddress | Should -Not -Be $null
         $Result.MaskBits | Should -Not -Be $null
@@ -76,7 +78,7 @@ Describe "Get-Subnet PS$PSVersion" {
         $Result.NetworkClass | Should -Not -Be $null
         $Result.Range | Should -Not -Be $null
     }
-    
+
     Context 'CIDR to Subnet conversions' {
         $TestCases = @(
             @{'CIDR' = 0; 'Subnet' = '0.0.0.0' }
@@ -113,44 +115,44 @@ Describe "Get-Subnet PS$PSVersion" {
             @{'CIDR' = 31; 'Subnet' = '255.255.255.254' }
             @{'CIDR' = 32; 'Subnet' = '255.255.255.255' }
         )
-    
+
         It "Should convert /<CIDR> to <Subnet>" -TestCases $TestCases {
             (Get-Subnet -IP 10.1.2.3 -MaskBits $CIDR).SubnetMask | Should -BeExactly $Subnet
         }
     }
-    
+
     Context 'Network class identification' {
         $TestCases = @(
             @{'IP' = '0.1.2.3'; 'Class' = 'A'; 'SubnetMask' = '255.0.0.0' }
             @{'IP' = '128.1.2.3'; 'Class' = 'B'; 'SubnetMask' = '255.255.0.0' }
             @{'IP' = '192.1.2.3'; 'Class' = 'C'; 'SubnetMask' = '255.255.255.0' }
         )
-    
+
         It "Should identify <IP> as <Class> with Mask <SubnetMask>" -TestCases $TestCases {
             param($IP, $Class, $SubnetMask)
-    
+
             $Result = (Get-Subnet -IP $IP)
-    
+
             $Result.NetworkClass | Should -Be $Class
             $Result.SubnetMask | Should -Be $SubnetMask
         }
-    
+
         $TestCases = @(
             @{'IP' = '224.1.2.3'; 'Class' = 'D' }
             @{'IP' = '240.1.2.3'; 'Class' = 'E' }
         )
-    
+
         It "Should identify <IP> as <Class>" -TestCases $TestCases {
             param($IP, $Class)
-    
+
             $Result = (Get-Subnet -IP $IP -MaskBits 24)
-    
+
             $Result.NetworkClass | Should -Be $Class
         }
     }
-    
+
     Context 'Invalid IP' {
-            
+
         It "Should throw for an invalid IP" {
             { Get-Subnet -IP 300.1.2.3 } | Should -Throw
         }
