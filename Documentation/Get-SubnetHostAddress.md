@@ -1,55 +1,52 @@
-# Get-Subnet
+# Get-SubnetHostAddress
 
 ## SYNOPSIS
-Returns subnet details for the local IP address, or a given network address and mask.
+Returns the list of usable host IP addresses for a given network address and mask.
 
 ## SYNTAX
 
 ```
-Get-Subnet [[-IP] <String>] [[-MaskBits] <Int32>] [-Force] [-ProgressAction <ActionPreference>]
+Get-SubnetHostAddress [[-IP] <String>] [[-MaskBits] <Int32>] [-ProgressAction <ActionPreference>]
  [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Use to get subnet details  for a given network address and mask, including network address, broadcast address, network class, address range, host addresses and host address count.
+Unlike Get-Subnet, this always calculates and returns the full list of host addresses
+regardless of subnet size, since that's this cmdlet's only job.
+It still warns (but does not
+refuse) when the subnet is larger than /16, since generating the full list for a very large
+subnet can take some time.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-Subnet 10.1.2.3/24
+Get-SubnetHostAddress 10.1.2.3/24
 ```
 
 Description
 -----------
-Returns the subnet details for the specified network and mask, specified as a single string to the -IP parameter.
+Returns the list of host addresses for the specified network and mask.
 
 ### EXAMPLE 2
 ```
-Get-Subnet 192.168.0.1 -MaskBits 23
+Get-SubnetHostAddress -IP 192.168.0.1 -MaskBits 12
 ```
 
 Description
 -----------
-Returns the subnet details for the specified network and mask.
+Returns the list of host addresses for the specified (large) network and mask.
+A warning is
+shown that this may take some time, but the addresses are still returned.
 
 ### EXAMPLE 3
 ```
-Get-Subnet
+'10.1.2.3/24','10.1.2.4/24' | Get-SubnetHostAddress
 ```
 
 Description
 -----------
-Returns the subnet details for the current local IP.
-
-### EXAMPLE 4
-```
-'10.1.2.3/24','10.1.2.4/24' | Get-Subnet
-```
-
-Description
------------
-Returns the subnet details for two specified networks.
+Returns the list of host addresses for two specified networks.
 
 ## PARAMETERS
 
@@ -79,22 +76,6 @@ Aliases: CIDR
 Required: False
 Position: 2
 Default value: 0
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Force
-Use to force the return of the full list of host IP addresses regardless of the subnet size (skipped by default for subnets larger than /16).
-HostAddressCount is always calculated and returned, regardless of subnet size or whether -Force is used.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
