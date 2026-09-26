@@ -62,17 +62,25 @@ function Get-Subnet {
             $Mask = $MaskBits 
         }
 
-        if (-not $IP) { 
-            $LocalIP = (Get-NetIPAddress | Where-Object { $_.AddressFamily -eq 'IPv4' -and $_.PrefixOrigin -ne 'WellKnown' })
+        if (-not $IP) {
+            $LocalIP = Get-LocalIPv4Address
+
+            if (-not $LocalIP) {
+                throw "Unable to determine a local IPv4 address for this system. Please specify the -IP parameter explicitly."
+            }
 
             $IP = $LocalIP.IPAddress
             If ($Mask -notin 0..32) { $Mask = $LocalIP.PrefixLength }
         }
 
-        if ($IP -match '/\d') { 
-            $IPandMask = $IP -Split '/' 
+        if ($IP -match '/\d') {
+            $IPandMask = $IP -Split '/'
             $IP = $IPandMask[0]
-            $Mask = $IPandMask[1]
+            # Without this cast, $Mask stays a string here, and PowerShell's comparison operators then
+            # compare it lexicographically rather than numerically -- e.g. '8' -ge 16 is $true, because
+            # '8' -ge 16 is stringwise, so '8' > '1'. That silently mis-triggers (or skips) the -ge 16 /
+            # -ge 31 checks below for any single-digit mask (/0 - /9).
+            $Mask = [int]$IPandMask[1]
         }
         
         $Class = Get-NetworkClass -IP $IP

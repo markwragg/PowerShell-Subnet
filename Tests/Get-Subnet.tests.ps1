@@ -65,8 +65,10 @@ Describe "Get-Subnet PS$PSVersion" {
         $Result.HostAddresses | Should -HaveCount 1
     }
 
-    #skipped for ci/cd
-    It 'Should calculate the Subnet of the local NIC IP' -Skip {
+    #skipped on Azure DevOps build agents -- exercises the real local NIC, whose address/mask can't be asserted on deterministically
+    $IsAzureDevOpsBuild = $env:TF_BUILD -eq 'True'
+
+    It 'Should calculate the Subnet of the local NIC IP' -Skip:$IsAzureDevOpsBuild {
 
         $Result = Get-Subnet
 
@@ -77,6 +79,31 @@ Describe "Get-Subnet PS$PSVersion" {
         $Result.BroadcastAddress | Should -Not -Be $null
         $Result.NetworkClass | Should -Not -Be $null
         $Result.Range | Should -Not -Be $null
+    }
+
+    It 'Should calculate the Subnet of the local NIC IP when mocked' {
+
+        Mock Get-LocalIPv4Address {
+            [pscustomobject]@{
+                IPAddress    = '192.168.1.50'
+                PrefixLength = 24
+            }
+        } -ModuleName Subnet
+
+        $Result = Get-Subnet
+
+        $Result | Should -BeOfType [pscustomobject]
+        $Result.IPAddress | Should -Be '192.168.1.50'
+        $Result.MaskBits | Should -Be 24
+        $Result.NetworkAddress | Should -Be '192.168.1.0'
+        $Result.BroadcastAddress | Should -Be '192.168.1.255'
+    }
+
+    It 'Should throw a clear error when no local IPv4 address can be found' {
+
+        Mock Get-LocalIPv4Address { $null } -ModuleName Subnet
+
+        { Get-Subnet } | Should -Throw '*Please specify the -IP parameter explicitly*'
     }
 
     Context 'CIDR to Subnet conversions' {
@@ -155,6 +182,38 @@ Describe "Get-Subnet PS$PSVersion" {
 
         It "Should throw for an invalid IP" {
             { Get-Subnet -IP 300.1.2.3 } | Should -Throw
+        }
+    }
+
+    Context 'Mask cannot be inferred' {
+
+        $TestCases = @(
+            @{'IP' = '224.1.2.3'; 'Class' = 'D' }
+            @{'IP' = '240.1.2.3'; 'Class' = 'E' }
+        )
+
+        It "Should throw when no mask is given for a Class <Class> address" -TestCases $TestCases {
+            { Get-Subnet -IP $IP } | Should -Throw
+        }
+    }
+
+    Context 'Single-digit masks given via IP/Mask notation' {
+
+        # Regression test: when the mask comes from splitting a combined "IP/Mask" string rather than
+        # from -MaskBits, it must be cast to [int]. Left as a string, "-ge 16" and "-ge 31" below compare
+        # lexicographically rather than numerically, so e.g. '8' -ge 16 and '8' -ge 31 are both $true --
+        # silently skipping the warning below AND skipping full host enumeration in favour of treating the
+        # network like a /31, for any single-digit mask (/0 - /9).
+        $TestCases = @(
+            @{ CIDR = '10.0.0.0/8' }
+            @{ CIDR = '10.0.0.0/9' }
+        )
+
+        It "Should not enumerate host addresses for <CIDR> without -Force" -TestCases $TestCases {
+            $Result = Get-Subnet -IP $CIDR
+
+            $Result.HostAddresses | Should -BeNullOrEmpty
+            $Result.HostAddressCount | Should -BeNullOrEmpty
         }
     }
 }
