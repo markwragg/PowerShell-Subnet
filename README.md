@@ -1,6 +1,6 @@
 # PowerShell-Subnet
 
-[![Build Status](https://dev.azure.com/markwragg/GitHub/_apis/build/status/markwragg.PowerShell-Subnet?branchName=master)](https://dev.azure.com/markwragg/GitHub/_build/latest?definitionId=10&branchName=master) ![coverage](https://img.shields.io/badge/coverage-86%25-yellow.svg)
+[![Build Status](https://dev.azure.com/markwragg/GitHub/_apis/build/status/markwragg.PowerShell-Subnet?branchName=master)](https://dev.azure.com/markwragg/GitHub/_build/latest?definitionId=10&branchName=master) ![coverage](https://img.shields.io/badge/coverage-99%25-brightgreen.svg)
 
 A PowerShell module for cmdlets related to network subnet calculations.
 
@@ -54,7 +54,7 @@ HostAddresses    : {192.168.0.1, 192.168.0.2, 192.168.0.3, 192.168.0.4...}
 HostAddressCount : 4094
 ```
 
-Get the subnet details for the current local network IP:
+Get the subnet details for the current local network IP (works on Windows, Linux and macOS):
 
 ```powershell
 Get-Subnet

@@ -65,10 +65,7 @@ Describe "Get-Subnet PS$PSVersion" {
         $Result.HostAddresses | Should -HaveCount 1
     }
 
-    #skipped on Azure DevOps build agents -- exercises the real local NIC, whose address/mask can't be asserted on deterministically
-    $IsAzureDevOpsBuild = $env:TF_BUILD -eq 'True'
-
-    It 'Should calculate the Subnet of the local NIC IP' -Skip:$IsAzureDevOpsBuild {
+    It 'Should calculate the Subnet of the local NIC IP' {
 
         $Result = Get-Subnet
 
