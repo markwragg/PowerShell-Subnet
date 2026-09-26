@@ -13,7 +13,7 @@ function Get-Subnet {
             The numerical representation of the subnet mask.
 
         .PARAMETER Force
-            Use to force the return of all host IP addresses regardless of the subnet size (skipped by default for subnets larger than /16).
+            Use to force the return of the full list of host IP addresses regardless of the subnet size (skipped by default for subnets larger than /16). HostAddressCount is always calculated and returned, regardless of subnet size or whether -Force is used.
 
         .EXAMPLE
             Get-Subnet 10.1.2.3/24
@@ -43,7 +43,7 @@ function Get-Subnet {
             -----------
             Returns the subnet details for two specified networks.
     #>
-    param ( 
+    param (
         [parameter(ValueFromPipeline)]
         [string]
         $IP,
@@ -58,86 +58,44 @@ function Get-Subnet {
     )
     process {
 
-        if ($PSBoundParameters.ContainsKey('MaskBits')) { 
-            $Mask = $MaskBits 
-        }
+        $Mask = $null
+        if ($PSBoundParameters.ContainsKey('MaskBits')) { $Mask = $MaskBits }
 
-        if (-not $IP) {
-            $LocalIP = Get-LocalIPv4Address
+        $Details = Resolve-Subnet -IP $IP -Mask $Mask
 
-            if (-not $LocalIP) {
-                throw "Unable to determine a local IPv4 address for this system. Please specify the -IP parameter explicitly."
-            }
-
-            $IP = $LocalIP.IPAddress
-            If ($Mask -notin 0..32) { $Mask = $LocalIP.PrefixLength }
-        }
-
-        if ($IP -match '/\d') {
-            $IPandMask = $IP -Split '/'
-            $IP = $IPandMask[0]
-            # Without this cast, $Mask stays a string here, and PowerShell's comparison operators then
-            # compare it lexicographically rather than numerically -- e.g. '8' -ge 16 is $true, because
-            # '8' -ge 16 is stringwise, so '8' > '1'. That silently mis-triggers (or skips) the -ge 16 /
-            # -ge 31 checks below for any single-digit mask (/0 - /9).
-            $Mask = [int]$IPandMask[1]
-        }
-        
-        $Class = Get-NetworkClass -IP $IP
-
-        if ($Mask -notin 0..32) {
-
-            $Mask = switch ($Class) {
-                'A' { 8 }
-                'B' { 16 }
-                'C' { 24 }
-                default { 
-                    throw "Subnet mask size was not specified and could not be inferred because the address is Class $Class." 
-                }
-            }
-
-            Write-Warning "Subnet mask size was not specified. Using default subnet size for a Class $Class network of /$Mask."
-        }
-
-        $IPAddr = [ipaddress]::Parse($IP)
-        $MaskAddr = [ipaddress]::Parse((Convert-Int64toIP -int ([convert]::ToInt64(("1" * $Mask + "0" * (32 - $Mask)), 2))))        
-        $NetworkAddr = [ipaddress]($MaskAddr.address -band $IPAddr.address) 
-        $BroadcastAddr = [ipaddress](([ipaddress]::parse("255.255.255.255").address -bxor $MaskAddr.address -bor $NetworkAddr.address))
+        $NetworkAddr = $Details.NetworkAddr
+        $BroadcastAddr = $Details.BroadcastAddr
         $Range = "$NetworkAddr ~ $BroadcastAddr"
-        
-        $HostStartAddr = (Convert-IPtoInt64 -ip $NetworkAddr.ipaddresstostring) + 1
-        $HostEndAddr = (Convert-IPtoInt64 -ip $broadcastaddr.ipaddresstostring) - 1
 
-        if ($Mask -ge 16 -or $Force) {
-            
-            Write-Progress "Calcualting host addresses for $NetworkAddr/$Mask.."
-            if ($Mask -ge 31) {
-                $HostAddresses = ,$NetworkAddr
-                if ($Mask -eq 31) {
-                    $HostAddresses += $BroadcastAddr
-                }
+        # The count is cheap arithmetic regardless of subnet size, so it's always calculated -- it's only
+        # the full list of individual host addresses below that's gated behind the size/-Force check.
+        $HostAddressCount = if ($Details.Mask -eq 32) { 1 } elseif ($Details.Mask -eq 31) { 2 } else { ($Details.HostEndAddr - $Details.HostStartAddr) + 1 }
 
-                $HostAddressCount = $HostAddresses.Length
+        if ($Details.Mask -ge 16 -or $Force) {
+
+            Write-Progress "Calcualting host addresses for $NetworkAddr/$($Details.Mask).."
+
+            # Get-SubnetHostAddress does the actual enumeration -- it's given the already-resolved IP/Mask
+            # directly, so it won't re-run local-IP lookup or mask inference (and won't duplicate the
+            # warning Resolve-Subnet already issued above if the mask had to be inferred).
+            $HostAddresses = @(Get-SubnetHostAddress -IP $Details.IPAddr.IPAddressToString -MaskBits $Details.Mask)
+
+            if ($Details.Mask -ge 31) {
                 $NetworkAddr = $null
                 $BroadcastAddr = $null
-            } else {
-                $HostAddresses = for ($i = $HostStartAddr; $i -le $HostEndAddr; $i++) {
-                    Convert-Int64toIP -int $i
-                }
-                $HostAddressCount = ($HostEndAddr - $HostStartAddr) + 1
-            }                     
+            }
         }
         else {
-            Write-Warning "Host address enumeration was not performed because it would take some time for a /$Mask subnet. `nUse -Force if you want it to occur."
+            Write-Warning "The full list of host addresses was not returned because it would take some time for a /$($Details.Mask) subnet. `nUse -Force if you want it to occur. HostAddressCount has been calculated regardless."
         }
 
         [pscustomobject]@{
-            IPAddress        = $IPAddr
-            MaskBits         = $Mask
+            IPAddress        = $Details.IPAddr
+            MaskBits         = $Details.Mask
             NetworkAddress   = $NetworkAddr
-            BroadcastAddress = $broadcastaddr
-            SubnetMask       = $MaskAddr
-            NetworkClass     = $Class
+            BroadcastAddress = $BroadcastAddr
+            SubnetMask       = $Details.MaskAddr
+            NetworkClass     = $Details.Class
             Range            = $Range
             HostAddresses    = $HostAddresses
             HostAddressCount = $HostAddressCount

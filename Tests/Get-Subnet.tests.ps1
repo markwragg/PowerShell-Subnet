@@ -103,6 +103,25 @@ Describe "Get-Subnet PS$PSVersion" {
         { Get-Subnet } | Should -Throw '*Please specify the -IP parameter explicitly*'
     }
 
+    Context 'HostAddressCount is always calculated, even when the address list is not' {
+
+        It 'Should calculate HostAddressCount for a /8 without enumerating host addresses' {
+
+            $Result = Get-Subnet -IP 10.0.0.0 -MaskBits 8
+
+            $Result.HostAddresses | Should -BeNullOrEmpty
+            $Result.HostAddressCount | Should -Be 16777214
+        }
+
+        It 'Should calculate HostAddressCount for a /0' {
+
+            $Result = Get-Subnet -IP 0.0.0.0 -MaskBits 0
+
+            $Result.HostAddresses | Should -BeNullOrEmpty
+            $Result.HostAddressCount | Should -Be 4294967294
+        }
+    }
+
     Context 'CIDR to Subnet conversions' {
         $TestCases = @(
             @{'CIDR' = 0; 'Subnet' = '0.0.0.0' }
@@ -202,15 +221,15 @@ Describe "Get-Subnet PS$PSVersion" {
         # silently skipping the warning below AND skipping full host enumeration in favour of treating the
         # network like a /31, for any single-digit mask (/0 - /9).
         $TestCases = @(
-            @{ CIDR = '10.0.0.0/8' }
-            @{ CIDR = '10.0.0.0/9' }
+            @{ CIDR = '10.0.0.0/8'; Count = 16777214 }
+            @{ CIDR = '10.0.0.0/9'; Count = 8388606 }
         )
 
-        It "Should not enumerate host addresses for <CIDR> without -Force" -TestCases $TestCases {
+        It "Should not enumerate host addresses for <CIDR> without -Force, but should still calculate HostAddressCount" -TestCases $TestCases {
             $Result = Get-Subnet -IP $CIDR
 
             $Result.HostAddresses | Should -BeNullOrEmpty
-            $Result.HostAddressCount | Should -BeNullOrEmpty
+            $Result.HostAddressCount | Should -Be $Count
         }
     }
 }

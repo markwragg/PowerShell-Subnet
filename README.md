@@ -67,8 +67,26 @@ Get the subnet details for the current local network IP (works on Windows, Linux
 Get-Subnet
 ```
 
+Get just the list of host addresses for a subnet, without the rest of the subnet detail object:
+
+```powershell
+Get-SubnetHostAddress 192.168.4.56/29
+```
+
+Result:
+
+```text
+192.168.4.57
+192.168.4.58
+192.168.4.59
+192.168.4.60
+192.168.4.61
+192.168.4.62
+```
+
 ## Other Features
 
-- If the subnet size specified is larger than a /16, the cmdlet will not return the host addresses by default, and instead warn that this would take some time.
+- `Get-Subnet`'s `HostAddressCount` is always calculated, regardless of subnet size, since it's just arithmetic. If the subnet size specified is larger than a /16, `Get-Subnet` will not return the full list of individual `HostAddresses` by default, and instead warn that this would take some time.
 If you want to force the return of host addresses for these subnets, use `-Force`.
-- If no subnet mask size is specified, the cmdlet will use the default size for the class of address, and show a warning that it has done so.
+- `Get-SubnetHostAddress`, since returning host addresses is its only job, always calculates and returns them regardless of subnet size -- there's no `-Force` needed. It still warns if the subnet is larger than /16, since that may take some time.
+- If no subnet mask size is specified, the cmdlets will use the default size for the class of address, and show a warning that they have done so.
