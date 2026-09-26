@@ -90,6 +90,30 @@ Result:
 Get-Subnet 192.168.4.56/29 | Get-SubnetHostAddress
 ```
 
+Test whether an IP address is within the private (RFC 1918) address space:
+
+```powershell
+Test-PrivateIP -IP 172.16.1.2
+```
+
+Result:
+
+```text
+True
+```
+
+Or whether it's within the public address space:
+
+```powershell
+Test-PublicIP -IP 8.8.8.8
+```
+
+Result:
+
+```text
+True
+```
+
 ## Other Features
 
 - `Get-Subnet`'s `HostAddressCount` is always calculated, regardless of subnet size, since it's just arithmetic. If the subnet size specified is larger than a /16, `Get-Subnet` will not return the full list of individual `HostAddresses` by default, and instead warn that this would take some time.

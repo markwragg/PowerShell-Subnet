@@ -1,7 +1,8 @@
 # Change Log
 
-## [Unreleased]
+## !Deploy
 
+* [Feature] Added `Test-PublicIP`, a cmdlet that returns `$true` or `$false` for a given IP address depending on whether or not it is within the public IP address space (i.e. the inverse of `Test-PrivateIP`).
 * [Feature] Added `Get-SubnetHostAddress`, a cmdlet that returns just the list of host addresses for a given subnet, as `[ipaddress]` objects (use `-AsString` for plain strings instead). Unlike `Get-Subnet`, it always calculates and returns the addresses regardless of subnet size (that's its only job, so there's no `-Force`) -- it still warns if the subnet is larger than /16, since that may take some time. `Get-Subnet` now uses it internally to populate its own `HostAddresses` (still a string array). `Get-SubnetHostAddress` also accepts the object output by `Get-Subnet` via the pipeline.
 * [Feature] `Get-Subnet`'s `HostAddressCount` is now always calculated, regardless of subnet size, since it's just arithmetic -- only the full `HostAddresses` list is skipped for subnets larger than /16 without `-Force`.
 * [Fix] `Get-Subnet` and `Get-SubnetHostAddress` now throw a clear error for an invalid IP address, instead of silently treating it as a /0 network -- which, for `Get-SubnetHostAddress`, meant trying to enumerate all ~4.3 billion IPv4 addresses.
