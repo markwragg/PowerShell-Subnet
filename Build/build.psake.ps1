@@ -173,7 +173,7 @@ Task 'Test' -Depends 'ImportStagingModule' {
     Import-Module -Name 'Pester' -RequiredVersion '6.1.0' -Force
 
     # Gather test results. Store them in a variable and file
-    $CodeFiles = (Get-ChildItem $ENV:BHModulePath -Recurse -Include '*.ps1').FullName
+    $CodeFiles = (Get-ChildItem $StagingModulePath -Recurse -Include '*.psm1').FullName
     $TestFilePath = Join-Path -Path $ArtifactFolder -ChildPath $TestFile
 
     $PesterConfiguration = New-PesterConfiguration
