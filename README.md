@@ -2,15 +2,22 @@
 
 [![Build Status](https://dev.azure.com/markwragg/GitHub/_apis/build/status/markwragg.PowerShell-Subnet?branchName=master)](https://dev.azure.com/markwragg/GitHub/_build/latest?definitionId=10&branchName=master) ![coverage](https://img.shields.io/badge/coverage-99%25-brightgreen.svg)
 
-A PowerShell module for cmdlets related to network subnet calculations.
+A cross-platform PowerShell module for cmdlets related to network subnet calculations.
 
 ## Installation
 
-The module is published in the PSGallery, so if you have PowerShell 5 can be installed by running:
+The module is published in the PSGallery, so if you have PowerShell 5 or newer can be installed by running:
 
 ```powershell
 Install-Module Subnet -Scope CurrentUser
 ```
+
+Or:
+
+```powershell
+Install-PSResource Subnet
+```
+
 
 ## Usage
 
