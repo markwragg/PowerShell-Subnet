@@ -175,12 +175,18 @@ Task 'Test' -Depends 'ImportStagingModule' {
     # Gather test results. Store them in a variable and file
     $CodeFiles = (Get-ChildItem $StagingModulePath -Recurse -Include '*.psm1').FullName
     $TestFilePath = Join-Path -Path $ArtifactFolder -ChildPath $TestFile
+    $CodeCoverageFilePath = Join-Path -Path $ArtifactFolder -ChildPath 'CodeCoverage.xml'
 
     $PesterConfiguration = New-PesterConfiguration
     $PesterConfiguration.Run.Path = $TestScripts.FullName
     $PesterConfiguration.Run.PassThru = $true
     $PesterConfiguration.CodeCoverage.Enabled = $true
     $PesterConfiguration.CodeCoverage.Path = $CodeFiles
+    # JaCoCo format is consumed by the pipeline's PublishCodeCoverageResults task to populate the
+    # ADO build's Code Coverage tab.
+    $PesterConfiguration.CodeCoverage.OutputFormat = 'JaCoCo'
+    $PesterConfiguration.CodeCoverage.OutputPath = $CodeCoverageFilePath
+    $PesterConfiguration.CodeCoverage.OutputEncoding = 'UTF8'
     $PesterConfiguration.TestResult.Enabled = $true
     $PesterConfiguration.TestResult.OutputFormat = 'NUnitXml'
     $PesterConfiguration.TestResult.OutputPath = $TestFilePath
@@ -209,7 +215,22 @@ Task 'UpdateCoverageBadge' -Depends 'Init' {
         throw "CoveragePercent environment variable not set. Run the 'Test' task first and pass its coverage output through."
     }
 
-    Set-ShieldsIoBadge -Path (Join-Path $ProjectRoot 'README.md') -Subject 'coverage' -Status $env:CoveragePercent -AsPercentage
+    # A switch's clauses are all tested regardless of earlier matches unless each one breaks,
+    # so without 'break' a value like 87 would match both the 75 and 60 clauses below.
+    $Color = switch ([int]$env:CoveragePercent) {
+        { $_ -ge 90 } { 'brightgreen'; break }
+        { $_ -ge 75 } { 'yellow'; break }
+        { $_ -ge 60 } { 'orange'; break }
+        default { 'red' }
+    }
+
+    # The badge is wrapped in a markdown link to the ADO code coverage page (see README.md), so this
+    # replaces only the shields.io URL rather than using BuildHelpers' Set-ShieldsIoBadge, whose regex
+    # ('!\[Subject\].+\)') is greedy and would also consume -- and strip -- that surrounding link.
+    $ReadmePath = Join-Path -Path $ProjectRoot -ChildPath 'README.md'
+    $ReadmeContent = Get-Content -Path $ReadmePath
+    $ReadmeContent = $ReadmeContent -replace 'https://img\.shields\.io/badge/coverage-\d+%25-\w+\.svg', "https://img.shields.io/badge/coverage-$($env:CoveragePercent)%25-$Color.svg"
+    Set-Content -Path $ReadmePath -Value $ReadmeContent
 }
 
 
@@ -381,9 +402,9 @@ Task 'Deploy' -Depends 'Init' {
     try {
         $Version = Get-NextPSGalleryVersion -Name $env:BHProjectName -ErrorAction 'Stop'
 
-        # Ensure the next deploy is at least 1.1.0. Once the Gallery has a 1.1.0+ release published, Get-NextPSGalleryVersion will always be >= this floor
+        # Ensure the next deploy is at least 1.2.0. Once the Gallery has a 1.2.0+ release published, Get-NextPSGalleryVersion will always be >= this floor
         # on its own, so this check becomes a no-op and doesn't need to be removed later.
-        $MinimumVersion = [Version]'1.1.0'
+        $MinimumVersion = [Version]'1.2.0'
         if ($Version -lt $MinimumVersion) { $Version = $MinimumVersion }
 
         # A [Breaking] entry in the unreleased ('!Deploy') CHANGELOG section marks this as a breaking release,

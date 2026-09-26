@@ -48,6 +48,24 @@ Describe "Resolve-Subnet PS$PSVersion" {
         }
     }
 
+    It 'Should throw a clear error for an unparseable IP address, rather than silently zeroing the mask' {
+        InModuleScope Subnet {
+            { Resolve-Subnet -IP 'blah' -Mask $null } | Should -Throw "*'blah' is not a valid IPv4 address*"
+        }
+    }
+
+    It 'Should throw a clear error for an out-of-range IP address' {
+        InModuleScope Subnet {
+            { Resolve-Subnet -IP '999.1.2.3' -Mask $null } | Should -Throw "*'999.1.2.3' is not a valid IPv4 address*"
+        }
+    }
+
+    It 'Should throw a clear error for an IPv6 address' {
+        InModuleScope Subnet {
+            { Resolve-Subnet -IP '::1' -Mask $null } | Should -Throw "*'::1' is not a valid IPv4 address*"
+        }
+    }
+
     It 'Should fall back to the local IPv4 address when no IP is given' {
         InModuleScope Subnet {
             Mock Get-LocalIPv4Address {

@@ -62,6 +62,12 @@ stages:
             name: TestCore
             displayName: "Test PowerShell Core"
 
+          - task: PublishCodeCoverageResults@2
+            displayName: "Publish Code Coverage"
+            inputs:
+              summaryFileLocation: "Artifacts/CodeCoverage.xml"
+            condition: always()
+
           - powershell: |
               $modulesPath = ($env:PSModulePath -split [IO.Path]::PathSeparator) |
                   Where-Object { $_ -like "$HOME*" } | Select-Object -First 1

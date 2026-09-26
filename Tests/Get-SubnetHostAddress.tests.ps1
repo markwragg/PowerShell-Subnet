@@ -21,9 +21,43 @@ Describe "Get-SubnetHostAddress PS$PSVersion" {
         '1.2.3.4/30' | Get-SubnetHostAddress | Should -Be @('1.2.3.5', '1.2.3.6')
     }
 
+    It 'Should return [ipaddress] objects rather than strings' {
+        Get-SubnetHostAddress -IP 1.2.3.4/30 | ForEach-Object { $_ | Should -BeOfType [ipaddress] }
+    }
+
+    It 'Should return [ipaddress] objects for a /31 and a /32' {
+        Get-SubnetHostAddress -IP 1.2.3.4/31 | ForEach-Object { $_ | Should -BeOfType [ipaddress] }
+        Get-SubnetHostAddress -IP 1.2.3.4/32 | ForEach-Object { $_ | Should -BeOfType [ipaddress] }
+    }
+
+    It 'Should return strings instead of [ipaddress] objects when -AsString is used' {
+        $Result = Get-SubnetHostAddress -IP 1.2.3.4/30 -AsString
+
+        $Result | Should -Be @('1.2.3.5', '1.2.3.6')
+        $Result | ForEach-Object { $_ | Should -BeOfType [string] }
+    }
+
+    It 'Should return strings for a /31 and a /32 when -AsString is used' {
+        $Result31 = Get-SubnetHostAddress -IP 1.2.3.4/31 -AsString
+        $Result31 | ForEach-Object { $_ | Should -BeOfType [string] }
+        $Result31 | Should -Be @('1.2.3.4', '1.2.3.5')
+
+        $Result32 = Get-SubnetHostAddress -IP 1.2.3.4/32 -AsString
+        $Result32 | ForEach-Object { $_ | Should -BeOfType [string] }
+        $Result32 | Should -Be '1.2.3.4'
+    }
+
     It 'Should return the same host addresses as Get-Subnet for the same input' {
         $Expected = (Get-Subnet -IP 1.2.3.4/28).HostAddresses
         Get-SubnetHostAddress -IP 1.2.3.4/28 | Should -Be $Expected
+    }
+
+    It 'Should accept the output of Get-Subnet via the pipeline' {
+        Get-Subnet -IP 1.2.3.4/30 | Get-SubnetHostAddress | Should -Be @('1.2.3.5', '1.2.3.6')
+    }
+
+    It 'Should throw a clear error for an invalid IP address instead of enumerating the entire IPv4 space' {
+        { Get-SubnetHostAddress -IP 'blah' } | Should -Throw "*'blah' is not a valid IPv4 address*"
     }
 
     It 'Should always calculate and return host addresses, even for a subnet larger than /16' {

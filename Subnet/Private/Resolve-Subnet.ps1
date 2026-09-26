@@ -34,6 +34,12 @@ function Resolve-Subnet {
         $Mask = [int]$IPandMask[1]
     }
 
+    # Validate the IP address and ensure it's IPv4. [ipaddress]::TryParse returns $false for invalid addresses, and also for valid IPv6 addresses.
+    $ParsedIP = $null
+    if (-not [ipaddress]::TryParse($IP, [ref]$ParsedIP) -or $ParsedIP.AddressFamily -ne [System.Net.Sockets.AddressFamily]::InterNetwork) {
+        throw "'$IP' is not a valid IPv4 address."
+    }
+
     $Class = Get-NetworkClass -IP $IP
 
     if ($Mask -notin 0..32) {
@@ -50,7 +56,7 @@ function Resolve-Subnet {
         Write-Warning "Subnet mask size was not specified. Using default subnet size for a Class $Class network of /$Mask."
     }
 
-    $IPAddr = [ipaddress]::Parse($IP)
+    $IPAddr = $ParsedIP
     $MaskAddr = [ipaddress]::Parse((Convert-Int64toIP -int ([convert]::ToInt64(("1" * $Mask + "0" * (32 - $Mask)), 2))))
     $NetworkAddr = [ipaddress]($MaskAddr.address -band $IPAddr.address)
     $BroadcastAddr = [ipaddress](([ipaddress]::parse("255.255.255.255").address -bxor $MaskAddr.address -bor $NetworkAddr.address))

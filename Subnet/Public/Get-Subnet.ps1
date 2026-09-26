@@ -77,8 +77,10 @@ function Get-Subnet {
 
             # Get-SubnetHostAddress does the actual enumeration -- it's given the already-resolved IP/Mask
             # directly, so it won't re-run local-IP lookup or mask inference (and won't duplicate the
-            # warning Resolve-Subnet already issued above if the mask had to be inferred).
-            $HostAddresses = @(Get-SubnetHostAddress -IP $Details.IPAddr.IPAddressToString -MaskBits $Details.Mask)
+            # warning Resolve-Subnet already issued above if the mask had to be inferred). -AsString is
+            # used since HostAddresses has always been a string array, unlike Get-SubnetHostAddress's own
+            # default [ipaddress] output.
+            $HostAddresses = @(Get-SubnetHostAddress -IP $Details.IPAddr.IPAddressToString -MaskBits $Details.Mask -AsString)
 
             if ($Details.Mask -ge 31) {
                 $NetworkAddr = $null

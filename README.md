@@ -1,6 +1,6 @@
 # PowerShell-Subnet
 
-[![Build Status](https://dev.azure.com/markwragg/GitHub/_apis/build/status/markwragg.PowerShell-Subnet?branchName=master)](https://dev.azure.com/markwragg/GitHub/_build/latest?definitionId=10&branchName=master) ![coverage](https://img.shields.io/badge/coverage-99%25-brightgreen.svg)
+[![Build Status](https://dev.azure.com/markwragg/GitHub/_apis/build/status/markwragg.PowerShell-Subnet?branchName=master)](https://dev.azure.com/markwragg/GitHub/_build/latest?definitionId=10&branchName=master) [![coverage](https://img.shields.io/badge/coverage-99%25-brightgreen.svg)](https://dev.azure.com/markwragg/GitHub/_build/latest?definitionId=10&branchName=master&view=codecoverage-tab)
 
 A cross-platform PowerShell module for cmdlets related to network subnet calculations.
 
@@ -67,10 +67,10 @@ Get the subnet details for the current local network IP (works on Windows, Linux
 Get-Subnet
 ```
 
-Get just the list of host addresses for a subnet, without the rest of the subnet detail object:
+Get just the list of host addresses for a subnet, without the rest of the subnet detail object. `Get-SubnetHostAddress` returns `[ipaddress]` objects by default; use `-AsString` for plain strings instead:
 
 ```powershell
-Get-SubnetHostAddress 192.168.4.56/29
+Get-SubnetHostAddress 192.168.4.56/29 -AsString
 ```
 
 Result:
@@ -82,6 +82,12 @@ Result:
 192.168.4.60
 192.168.4.61
 192.168.4.62
+```
+
+`Get-SubnetHostAddress` also accepts the object output by `Get-Subnet` via the pipeline:
+
+```powershell
+Get-Subnet 192.168.4.56/29 | Get-SubnetHostAddress
 ```
 
 ## Other Features

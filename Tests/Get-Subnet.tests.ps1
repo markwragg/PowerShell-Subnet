@@ -21,6 +21,7 @@ Describe "Get-Subnet PS$PSVersion" {
         $Result.NetworkClass | Should -Be 'A'
         $Result.Range | Should -Be '1.2.3.0 ~ 1.2.3.255'
         $Result.HostAddresses | Should -HaveCount 254
+        $Result.HostAddresses | ForEach-Object { $_ | Should -BeOfType [string] }
     }
 
     It 'Should calculate a Subnet IP with mask declared separately' {
@@ -35,6 +36,10 @@ Describe "Get-Subnet PS$PSVersion" {
         $Result.NetworkClass | Should -Be 'A'
         $Result.Range | Should -Be '1.2.3.0 ~ 1.2.3.255'
         $Result.HostAddresses | Should -HaveCount 254
+    }
+
+    It 'Should throw a clear error for an invalid IP address instead of returning a bogus subnet' {
+        { Get-Subnet -IP 'blah' } | Should -Throw "*'blah' is not a valid IPv4 address*"
     }
 
     It 'Should calculate a Subnet IP for a /31' {
