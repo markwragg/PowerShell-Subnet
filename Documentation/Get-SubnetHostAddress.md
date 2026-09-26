@@ -1,12 +1,13 @@
 # Get-SubnetHostAddress
 
 ## SYNOPSIS
-Returns the list of usable host IP addresses for a given network address and mask.
+Returns the list of usable host IP addresses, as \[ipaddress\] objects, for a given network
+address and mask.
 
 ## SYNTAX
 
 ```
-Get-SubnetHostAddress [[-IP] <String>] [[-MaskBits] <Int32>] [-ProgressAction <ActionPreference>]
+Get-SubnetHostAddress [[-IP] <Object>] [[-MaskBits] <Int32>] [-AsString] [-ProgressAction <ActionPreference>]
  [<CommonParameters>]
 ```
 
@@ -30,6 +31,16 @@ Returns the list of host addresses for the specified network and mask.
 
 ### EXAMPLE 2
 ```
+Get-SubnetHostAddress 10.1.2.3/24 -AsString
+```
+
+Description
+-----------
+Returns the list of host addresses for the specified network and mask, as strings instead of
+\[ipaddress\] objects.
+
+### EXAMPLE 3
+```
 Get-SubnetHostAddress -IP 192.168.0.1 -MaskBits 12
 ```
 
@@ -39,7 +50,7 @@ Returns the list of host addresses for the specified (large) network and mask.
 A warning is
 shown that this may take some time, but the addresses are still returned.
 
-### EXAMPLE 3
+### EXAMPLE 4
 ```
 '10.1.2.3/24','10.1.2.4/24' | Get-SubnetHostAddress
 ```
@@ -48,13 +59,22 @@ Description
 -----------
 Returns the list of host addresses for two specified networks.
 
+### EXAMPLE 5
+```
+Get-Subnet 10.1.2.3/24 | Get-SubnetHostAddress
+```
+
+Description
+-----------
+Returns the list of host addresses for the network and mask resolved by Get-Subnet.
+
 ## PARAMETERS
 
 ### -IP
 The network IP address or IP address with subnet mask via slash notation.
 
 ```yaml
-Type: String
+Type: Object
 Parameter Sets: (All)
 Aliases:
 
@@ -76,6 +96,21 @@ Aliases: CIDR
 Required: False
 Position: 2
 Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -AsString
+Return the host addresses as strings instead of \[ipaddress\] objects.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
