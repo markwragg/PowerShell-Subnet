@@ -1,6 +1,9 @@
 # PowerShell-Subnet
 
-[![Build Status](https://dev.azure.com/markwragg/GitHub/_apis/build/status/markwragg.PowerShell-Subnet?branchName=master)](https://dev.azure.com/markwragg/GitHub/_build/latest?definitionId=10&branchName=master) [![coverage](https://img.shields.io/badge/coverage-99%25-brightgreen.svg)](https://dev.azure.com/markwragg/GitHub/_build/latest?definitionId=10&branchName=master&view=codecoverage-tab)
+[![Build Status](https://github.com/markwragg/PowerShell-Subnet/actions/workflows/build.yml/badge.svg)](https://github.com/markwragg/PowerShell-Subnet/actions/workflows/build.yml)
+![coverage](https://img.shields.io/badge/coverage-99%25-brightgreen.svg)
+[![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/Subnet?label=PS%20Gallery)](https://www.powershellgallery.com/packages/Subnet)
+[![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/Subnet?color=D3D3D3)](https://www.powershellgallery.com/packages/Subnet)
 
 A cross-platform PowerShell module for cmdlets related to network subnet calculations.
 
