@@ -7,7 +7,9 @@ Task 'Test' -Depends 'ImportStagingModule' {
     Import-Module -Name 'Pester' -RequiredVersion '6.1.0' -Force
 
     # Gather test results. Store them in a variable and file
-    $CodeFiles = (Get-ChildItem $env:BHModulePath -Recurse -Include '*.ps1').FullName
+    # Coverage is measured against the staged, combined module (not the source .ps1 files) -- that's
+    # the file ImportStagingModule actually loads and the tests exercise, per Subnet.Tests.ps1's note.
+    $CodeFiles = (Get-ChildItem $StagingModulePath -Recurse -Include '*.psm1').FullName
     $TestFilePath = Join-Path -Path $ArtifactFolder -ChildPath $TestFile
 
     $PesterConfiguration = New-PesterConfiguration
