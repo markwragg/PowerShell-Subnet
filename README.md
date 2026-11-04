@@ -1,7 +1,7 @@
 # PowerShell-Subnet
 
 [![Build Status](https://github.com/markwragg/PowerShell-Subnet/actions/workflows/build.yml/badge.svg)](https://github.com/markwragg/PowerShell-Subnet/actions/workflows/build.yml)
-![coverage](https://img.shields.io/badge/coverage-99%25-brightgreen.svg)
+![coverage](https://img.shields.io/badge/coverage-0%25-red.svg)
 [![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/Subnet?label=PS%20Gallery)](https://www.powershellgallery.com/packages/Subnet)
 [![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/Subnet?color=D3D3D3)](https://www.powershellgallery.com/packages/Subnet)
 
