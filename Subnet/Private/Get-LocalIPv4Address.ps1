@@ -17,18 +17,8 @@ function Get-LocalIPv4Address {
         return
     }
 
-    # .PrefixLength isn't implemented on .NET Framework (Windows PowerShell), so fall back to counting
-    # the bits of .IPv4Mask there instead -- and the reverse is true on Linux/macOS, where .IPv4Mask
-    # throws because those platforms have no concept of a dotted-decimal subnet mask.
-    $PrefixLength = try {
-        $UnicastAddress.PrefixLength
-    }
-    catch {
-        Convert-SubnetMaskToPrefixLength -SubnetMask $UnicastAddress.IPv4Mask
-    }
-
     [pscustomobject]@{
         IPAddress    = $UnicastAddress.Address.IPAddressToString
-        PrefixLength = $PrefixLength
+        PrefixLength = Get-UnicastAddressPrefixLength -UnicastAddress $UnicastAddress
     }
 }
