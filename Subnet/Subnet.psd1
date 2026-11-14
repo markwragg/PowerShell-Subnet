@@ -12,7 +12,7 @@
 RootModule = 'Subnet.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.2.2'
+ModuleVersion = '1.2.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -104,7 +104,7 @@ PrivateData = @{
         ProjectUri = 'https://github.com/markwragg/PowerShell-Subnet'
 
         # A URL to an icon representing this module.
-        # IconUri = ''
+        IconUri = 'https://raw.githubusercontent.com/markwragg/PowerShell-Subnet/master/subnet-logo.png'
 
         # ReleaseNotes of this module
         ReleaseNotes = 'https://github.com/markwragg/PowerShell-Subnet/blob/master/CHANGELOG.md'

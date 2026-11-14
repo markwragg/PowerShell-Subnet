@@ -1,5 +1,9 @@
 # Change Log
 
+## !Deploy
+
+* Module Manifest improvements: Added `IconUri`, `'LicenseUri` and updated `ReleaseNotes` to point to this ChangeLog instead of the Readme.
+
 ## [1.2.1] - 2026-11-04
 
 * [Fix] `Get-LocalIPv4Address` now correctly falls back to counting subnet mask bits when a network interface's `.PrefixLength` isn't implemented (e.g. on .NET Framework). PowerShell silently swallows exceptions thrown by a .NET property getter accessed via `.`, so the previous `try`/`catch` around `$UnicastAddress.PrefixLength` could never actually catch anything there and would silently end up with a `$null` prefix length instead of falling back. The property is now read via reflection, in a new private function, `Get-UnicastAddressPrefixLength`, so the fallback is reachable (and directly testable).
