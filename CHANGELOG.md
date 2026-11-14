@@ -1,7 +1,6 @@
 # Change Log
 
-## !Deploy
-
+## [1.2.2] - 2026-11-14
 * Module Manifest improvements: Added `IconUri`, `'LicenseUri` and updated `ReleaseNotes` to point to this ChangeLog instead of the Readme.
 
 ## [1.2.1] - 2026-11-04
