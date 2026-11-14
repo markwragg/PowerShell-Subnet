@@ -98,7 +98,7 @@ PrivateData = @{
         Tags = 'Subnet','Subnet-calculator','Networking'
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/markwragg/PowerShell-Subnet/blob/master/LICENSE'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/markwragg/PowerShell-Subnet'
