@@ -14,7 +14,7 @@ A cross-platform PowerShell module for cmdlets related to network subnet calcula
 The module is published in the PSGallery, so if you have PowerShell 5 or newer can be installed by running:
 
 ```powershell
-Install-Module Subnet -Scope CurrentUser
+Install-Module Subnet
 ```
 
 Or:
