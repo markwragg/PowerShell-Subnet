@@ -29,7 +29,7 @@ Install-PSResource Subnet
 | ------ | -------- |
 | [Get-NetworkClass](https://github.com/markwragg/PowerShell-Subnet/wiki/Get-NetworkClass) | Use to determine the network class of a given IP address. |
 | [Get-Subnet](https://github.com/markwragg/PowerShell-Subnet/wiki/Get-Subnet) | Returns subnet details for the local IP address, or a given network address and mask. |
-| [Get-SubnetHostAddress](https://github.com/markwragg/PowerShell-Subnet/wiki/Get-SubnetHostAddress) | Returns the list of usable host IP addresses, as [ipaddress] objects, for a given network address and mask. |
+| [Get-SubnetHostAddress](https://github.com/markwragg/PowerShell-Subnet/wiki/Get-SubnetHostAddress) | Returns the list of usable host IP addresses, as `[ipaddress]` objects, for a given network address and mask. |
 | [Test-PrivateIP](https://github.com/markwragg/PowerShell-Subnet/wiki/Test-PrivateIP) | Use to determine if a given IP address is within the IPv4 private address space ranges. |
 | [Test-PublicIP](https://github.com/markwragg/PowerShell-Subnet/wiki/Test-PublicIP) | Use to determine if a given IP address is within the IPv4 public address space. |
 
