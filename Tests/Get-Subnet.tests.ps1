@@ -39,7 +39,7 @@ Describe "Get-Subnet PS$PSVersion" {
     }
 
     It 'Should throw a clear error for an invalid IP address instead of returning a bogus subnet' {
-        { Get-Subnet -IP 'blah' } | Should -Throw "*'blah' is not a valid IPv4 address*"
+        { Get-Subnet -IP 'blah' -ErrorAction Stop } | Should -Throw "*'blah' is not a valid IPv4 address*"
     }
 
     It 'Should calculate a Subnet IP for a /31' {
@@ -105,7 +105,7 @@ Describe "Get-Subnet PS$PSVersion" {
 
         Mock Get-LocalIPv4Address { $null } -ModuleName Subnet
 
-        { Get-Subnet } | Should -Throw '*Please specify the -IP parameter explicitly*'
+        { Get-Subnet -ErrorAction Stop } | Should -Throw '*Please specify the -IP parameter explicitly*'
     }
 
     Context 'HostAddressCount is always calculated, even when the address list is not' {
@@ -202,7 +202,38 @@ Describe "Get-Subnet PS$PSVersion" {
     Context 'Invalid IP' {
 
         It "Should throw for an invalid IP" {
-            { Get-Subnet -IP 300.1.2.3 } | Should -Throw
+            { Get-Subnet -IP 300.1.2.3 -ErrorAction Stop } | Should -Throw
+        }
+
+        It 'Should write a non-terminating error for invalid input and carry on with the rest of the pipeline' {
+            $Result = '10.1.2.3/30', 'blah', '10.1.2.3/33', '192.168.1.1/30' | Get-Subnet -ErrorAction SilentlyContinue -ErrorVariable Errors
+
+            $Result.NetworkAddress.IPAddressToString | Should -Be @('10.1.2.0', '192.168.1.0')
+            $Errors | Should -HaveCount 2
+            $Errors[0].Exception.Message | Should -BeLike "*'blah' is not a valid IPv4 address*"
+            $Errors[1].Exception.Message | Should -BeLike "*'10.1.2.3/33' does not have a valid subnet mask*"
+        }
+    }
+
+    Context 'Invalid -MaskBits' {
+
+        # As an [int] parameter, $null, '' and ' ' were silently converted to 0, i.e. a /0 network.
+        It "Should throw for -MaskBits <Label> rather than treating it as /0" -ForEach @(
+            @{ Label = '$null'; MaskBits = $null }
+            @{ Label = "''"; MaskBits = '' }
+            @{ Label = "' '"; MaskBits = ' ' }
+            @{ Label = "'abc'"; MaskBits = 'abc' }
+            @{ Label = '33'; MaskBits = 33 }
+            @{ Label = '-1'; MaskBits = -1 }
+            @{ Label = '24.5'; MaskBits = 24.5 }
+        ) {
+            { Get-Subnet -IP 10.1.2.3 -MaskBits $MaskBits -ErrorAction Stop } | Should -Throw '*is not a valid subnet mask*'
+        }
+
+        It 'Should accept -MaskBits as an integer or a numeric string' {
+            (Get-Subnet -IP 10.1.2.3 -MaskBits 24).MaskBits | Should -Be 24
+            (Get-Subnet -IP 10.1.2.3 -MaskBits '24').MaskBits | Should -Be 24
+            (Get-Subnet -IP 10.1.2.3 -CIDR 0 -Force:$false).MaskBits | Should -Be 0
         }
     }
 
@@ -214,7 +245,7 @@ Describe "Get-Subnet PS$PSVersion" {
         )
 
         It "Should throw when no mask is given for a Class <Class> address" -TestCases $TestCases {
-            { Get-Subnet -IP $IP } | Should -Throw
+            { Get-Subnet -IP $IP -ErrorAction Stop } | Should -Throw
         }
     }
 

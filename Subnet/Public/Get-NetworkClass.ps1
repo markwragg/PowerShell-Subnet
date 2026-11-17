@@ -30,6 +30,12 @@ function Get-NetworkClass {
     )
     process {
 
+        # Non-terminating, so one invalid item in a pipeline doesn't stop the rest being processed.
+        if (-not (Test-IPv4Address -IP $IP)) {
+            Write-Error "'$IP' is not a valid IPv4 address."
+            return
+        }
+
         switch ($IP.Split('.')[0]) {
             { $_ -in 0..127 } { 'A' }
             { $_ -in 128..191 } { 'B' }

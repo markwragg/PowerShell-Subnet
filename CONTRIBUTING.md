@@ -18,7 +18,7 @@ This module uses GitHub Actions for CI/CD. When a version of the code is ready f
 
 - Update [CHANGELOG.md](CHANGELOG.md) to have a new section, titled `## !Deploy` followed by a list of changes for the new version.
 
-By default the next version is calculated automatically (a patch bump, or a major bump if the section contains a `[Breaking]` entry). To pin a specific version instead, add it in square brackets after `!Deploy`, e.g. `## !Deploy [2.0.0]` -- when a version is given this way it's always used as-is, and the `[Breaking]` auto-bump is skipped.
+By default the next version is calculated automatically (a patch bump, or a major bump if the section contains a `[Breaking]` entry). To pin a specific version instead, add it after `!Deploy`, e.g. `## !Deploy 2.0.0` -- when a version is given this way it's always used as-is, and the `[Breaking]` auto-bump is skipped. The build will fail if that version isn't later than what's already published to the PowerShell Gallery.
 
 As part of the CI/CD pipeline the CHANGELOG.md file will then be automatically updated with the date and version of the module deployed, replacing the `!Deploy` heading.
 

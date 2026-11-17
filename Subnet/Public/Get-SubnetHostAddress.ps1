@@ -10,6 +10,10 @@ function Get-SubnetHostAddress {
             refuse) when the subnet is larger than /16, since generating the full list for a very large
             subnet can take some time.
 
+            If no mask is specified (either via slash notation or -MaskBits), one is inferred from the
+            address class (/8 for Class A, /16 for Class B, /24 for Class C) and a warning is shown. Be
+            aware that for a Class A or B address this can mean a very large number of addresses.
+
         .PARAMETER IP
             The network IP address or IP address with subnet mask via slash notation.
 
@@ -57,12 +61,13 @@ function Get-SubnetHostAddress {
             Returns the list of host addresses for the network and mask resolved by Get-Subnet.
     #>
     param (
-        [parameter(ValueFromPipeline)]
+        [parameter(Mandatory, ValueFromPipeline)]
+        [ValidateNotNullOrEmpty()]
         $IP,
 
-        [ValidateRange(0, 32)]
+        # Deliberately untyped: as [int], $null and '' would be silently converted to 0 (i.e. /0). It's
+        # validated by ConvertTo-PrefixLength instead.
         [Alias('CIDR')]
-        [int]
         $MaskBits,
 
         [switch]
@@ -70,14 +75,34 @@ function Get-SubnetHostAddress {
     )
     process {
 
+        # Invalid input is reported as a non-terminating error, so one bad item in a pipeline doesn't stop
+        # the rest being processed (-ErrorAction Stop still makes it terminating, as usual).
+        if ($null -eq $IP -or ($IP -is [string] -and [string]::IsNullOrWhiteSpace($IP))) {
+            Write-Error 'An IP address must be provided.'
+            return
+        }
+
         $ProvidedMaskBits = $PSBoundParameters.ContainsKey('MaskBits')
+
+        if ($IP -is [ipaddress]) {
+            # Accept an [ipaddress] directly (as Get-Subnet does via its [string] parameter). IPv6 is
+            # rejected by the IPv4 validation in Resolve-Subnet.
+            $IP = $IP.IPAddressToString
+        }
 
         if ($IP -isnot [string]) {
             # Accept the object output by Get-Subnet (or anything else exposing IPAddress/MaskBits
             # properties) piped in directly, rather than requiring its properties be extracted manually.
             # $IP can't be typed [string] to enable this -- PowerShell's pipeline binder would coerce the
             # whole object to a string (via its default ToString()) before this code ever ran.
-            if (-not $ProvidedMaskBits) {
+            if ($null -eq $IP.IPAddress) {
+                # Without this, a non-string value that isn't a Get-Subnet-style object (e.g. 0) would
+                # carry on unchanged and be stringified later, with 0 resolving to a 0.0.0.0/0 network.
+                Write-Error "'$IP' is not a valid IPv4 address."
+                return
+            }
+            # An object with no MaskBits leaves the mask unspecified, so it's inferred as usual.
+            if (-not $ProvidedMaskBits -and $null -ne $IP.MaskBits) {
                 $MaskBits = $IP.MaskBits
                 $ProvidedMaskBits = $true
             }
@@ -85,9 +110,19 @@ function Get-SubnetHostAddress {
         }
 
         $Mask = $null
-        if ($ProvidedMaskBits) { $Mask = $MaskBits }
+        if ($ProvidedMaskBits) {
+            $Mask = ConvertTo-PrefixLength -MaskBits $MaskBits
+            if ($null -eq $Mask) {
+                Write-Error "'$MaskBits' is not a valid subnet mask. Specify a value between 0 and 32."
+                return
+            }
+        }
 
         $Details = Resolve-Subnet -IP $IP -Mask $Mask
+        if ($Details.Error) {
+            Write-Error $Details.Error
+            return
+        }
 
         if ($Details.Mask -lt 16) {
             Write-Warning "Calculating host addresses for a /$($Details.Mask) subnet may take some time."

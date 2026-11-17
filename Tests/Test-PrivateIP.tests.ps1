@@ -48,4 +48,19 @@ Describe "Test-PrivateIP PS$PSVersion" {
             }
         }
     }
+
+    Context 'Invalid IPs' {
+
+        It "Should throw a clear error for '<_>' rather than pattern matching it" -TestCases 'blah', '999.1.1.1', '10.evil', '10.1', '192.168', '010.1.1.1', '1.2.3.4.5', '::1' {
+            { Test-PrivateIP -IP $_ -ErrorAction Stop } | Should -Throw "*'$_' is not a valid IPv4 address*"
+        }
+
+        It 'Should write a non-terminating error for an invalid IP and carry on with the rest of the pipeline' {
+            $Result = '8.8.8.8', 'blah', '10.0.0.1' | Test-PrivateIP -ErrorAction SilentlyContinue -ErrorVariable Errors
+
+            $Result | Should -Be @($false, $true)
+            $Errors | Should -HaveCount 1
+            $Errors[0].Exception.Message | Should -BeLike "*'blah' is not a valid IPv4 address*"
+        }
+    }
 }

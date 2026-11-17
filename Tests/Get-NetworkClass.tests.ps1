@@ -53,4 +53,19 @@ Describe "Get-NetworkClass PS$PSVersion" {
             Get-NetworkClass -IP $_ | Should -Be 'E'
         }
     }
+
+    Context 'Invalid IPs' {
+
+        It "Should throw a clear error for '<_>'" -TestCases 'blah', '999.1.1.1', '10.evil', '1.2.3', '0', '010.1.1.1', '1.2.3.4.5', '::1' {
+            { Get-NetworkClass -IP $_ -ErrorAction Stop } | Should -Throw "*'$_' is not a valid IPv4 address*"
+        }
+
+        It 'Should write a non-terminating error for an invalid IP and carry on with the rest of the pipeline' {
+            $Result = '8.8.8.8', 'blah', '192.168.1.1' | Get-NetworkClass -ErrorAction SilentlyContinue -ErrorVariable Errors
+
+            $Result | Should -Be @('A', 'C')
+            $Errors | Should -HaveCount 1
+            $Errors[0].Exception.Message | Should -BeLike "*'blah' is not a valid IPv4 address*"
+        }
+    }
 }

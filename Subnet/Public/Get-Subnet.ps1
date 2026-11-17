@@ -48,9 +48,9 @@ function Get-Subnet {
         [string]
         $IP,
 
-        [ValidateRange(0, 32)]
+        # Deliberately untyped: as [int], $null and '' would be silently converted to 0 (i.e. /0). It's
+        # validated by ConvertTo-PrefixLength instead.
         [Alias('CIDR')]
-        [int]
         $MaskBits,
 
         [switch]
@@ -58,10 +58,22 @@ function Get-Subnet {
     )
     process {
 
+        # Invalid input is reported as a non-terminating error, so one bad item in a pipeline doesn't stop
+        # the rest being processed (-ErrorAction Stop still makes it terminating, as usual).
         $Mask = $null
-        if ($PSBoundParameters.ContainsKey('MaskBits')) { $Mask = $MaskBits }
+        if ($PSBoundParameters.ContainsKey('MaskBits')) {
+            $Mask = ConvertTo-PrefixLength -MaskBits $MaskBits
+            if ($null -eq $Mask) {
+                Write-Error "'$MaskBits' is not a valid subnet mask. Specify a value between 0 and 32."
+                return
+            }
+        }
 
         $Details = Resolve-Subnet -IP $IP -Mask $Mask
+        if ($Details.Error) {
+            Write-Error $Details.Error
+            return
+        }
 
         $NetworkAddr = $Details.NetworkAddr
         $BroadcastAddr = $Details.BroadcastAddr

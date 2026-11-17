@@ -13,10 +13,11 @@ Task 'Deploy' -Depends 'Init' {
         return
     }
 
-    # The !Deploy heading may pin an explicit version, e.g. '## !Deploy [2.0.0]', which always wins over
-    # the version Get-NextPSGalleryVersion would otherwise compute.
+    # The !Deploy heading may pin an explicit version, e.g. '## !Deploy 2.0.0', which always wins over
+    # the version Get-NextPSGalleryVersion would otherwise compute. The trailing whitespace is matched up to,
+    # but not including, the line ending, so replacing the heading below doesn't swallow the line break.
     $ChangeLogContent = Get-Content $ChangeLogPath -Raw
-    if ($ChangeLogContent -notmatch '(?m)^## !Deploy(?:\s*\[(?<ExplicitVersion>[^\]]+)\])?\s*$') {
+    if ($ChangeLogContent -notmatch '(?m)^## !Deploy(?:[ \t]+(?<ExplicitVersion>\d+(?:\.\d+){1,3}))?[ \t]*(?=\r?$)') {
         Write-Host 'CHANGELOG.md did not contain ## !Deploy. Skipping deployment.'
         return
     }
@@ -27,6 +28,20 @@ Task 'Deploy' -Depends 'Init' {
     try {
         if ($ExplicitVersion) {
             $Version = [Version]$ExplicitVersion
+
+            # Check the pinned version is newer than what's already published, so a stale or typo'd version
+            # can't ship. Reuses BuildHelpers' own Find-NugetPackage (which Get-NextPSGalleryVersion calls
+            # internally) rather than pulling in a separate PowerShellGet dependency just for this check.
+            try {
+                $PublishedVersion = [Version](Find-NugetPackage -Name $env:BHProjectName -PackageSourceUrl 'https://www.powershellgallery.com/api/v2/' -IsLatest -ErrorAction 'Stop').Version
+            }
+            catch {
+                $PublishedVersion = [Version]'0.0.0'
+            }
+
+            if ($Version -le $PublishedVersion) {
+                throw "CHANGELOG.md requests deploying version [$Version], but [$PublishedVersion] is already published to the PowerShell Gallery. Use a version later than the current latest."
+            }
         }
         else {
             $Version = Get-NextPSGalleryVersion -Name $env:BHProjectName -ErrorAction 'Stop'

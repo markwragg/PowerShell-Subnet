@@ -23,6 +23,15 @@ Or:
 Install-PSResource Subnet
 ```
 
+> [!NOTE]
+> **Upgrading from 1.x:** Version 2.0 makes input validation stricter and changes some results. Check the following before upgrading:
+>
+> - **`Test-PublicIP` returns `$false` for more addresses.** It now only returns `$true` for globally reachable unicast addresses, so special-purpose ranges such as link-local (`169.254.0.0/16`), carrier-grade NAT (`100.64.0.0/10`), multicast (`224.0.0.0/4`) and the documentation ranges are no longer reported as public.
+> - **Invalid input is a non-terminating error.** This applies to every cmdlet, so a `try`/`catch` around a cmdlet won't catch invalid input on its own. Add `-ErrorAction Stop` to make it terminating.
+> - **IP addresses must be four plain decimal octets.** Zero-padded addresses (e.g. `192.168.001.001`), short forms (e.g. `10.1`) and addresses with surrounding whitespace are rejected.
+>
+> See the [CHANGELOG](https://github.com/markwragg/PowerShell-Subnet/blob/master/CHANGELOG.md) for the full list of changes.
+
 ## Cmdlets
 
 | Cmdlet | Synopsis |
@@ -104,7 +113,7 @@ Result:
 Get-Subnet 192.168.4.56/29 | Get-SubnetHostAddress
 ```
 
-Test whether an IP address is within the private (RFC 1918) address space:
+Test whether an IP address is within the private (RFC 1918) address space, or is a loopback (`127.0.0.0/8`) address:
 
 ```powershell
 Test-PrivateIP -IP 172.16.1.2
@@ -116,7 +125,7 @@ Result:
 True
 ```
 
-Or whether it's within the public address space:
+Or whether it's a public (globally reachable) address. An address that isn't private isn't necessarily public, e.g. link-local (`169.254.0.0/16`) or carrier-grade NAT (`100.64.0.0/10`) addresses are neither:
 
 ```powershell
 Test-PublicIP -IP 8.8.8.8

@@ -57,7 +57,61 @@ Describe "Get-SubnetHostAddress PS$PSVersion" {
     }
 
     It 'Should throw a clear error for an invalid IP address instead of enumerating the entire IPv4 space' {
-        { Get-SubnetHostAddress -IP 'blah' } | Should -Throw "*'blah' is not a valid IPv4 address*"
+        { Get-SubnetHostAddress -IP 'blah' -ErrorAction Stop } | Should -Throw "*'blah' is not a valid IPv4 address*"
+    }
+
+    It 'Should throw rather than enumerate a network or fall back to the local subnet when -IP is null' {
+        { Get-SubnetHostAddress -IP $null -ErrorAction Stop } | Should -Throw
+    }
+
+    It 'Should throw rather than enumerate a network or fall back to the local subnet when -IP is empty' {
+        { Get-SubnetHostAddress -IP '' -ErrorAction Stop } | Should -Throw
+    }
+
+    It 'Should throw rather than enumerate a network or fall back to the local subnet when -IP is whitespace' {
+        { Get-SubnetHostAddress -IP '  ' -ErrorAction Stop } | Should -Throw '*An IP address must be provided*'
+    }
+
+    It 'Should throw rather than enumerate a /0 network when -IP is a non-string value such as 0' {
+        { Get-SubnetHostAddress -IP 0 -ErrorAction Stop } | Should -Throw "*'0' is not a valid IPv4 address*"
+        { Get-SubnetHostAddress -IP 5 -MaskBits 30 -ErrorAction Stop } | Should -Throw "*'5' is not a valid IPv4 address*"
+        { Get-SubnetHostAddress -IP @{ a = 1 } -ErrorAction Stop } | Should -Throw '*is not a valid IPv4 address*'
+    }
+
+    It 'Should infer the mask from the address class, rather than using /0, for a piped object without MaskBits' {
+        $Result = [pscustomobject]@{ IPAddress = '192.168.1.4' } | Get-SubnetHostAddress
+        $Result | Should -HaveCount 254
+    }
+
+    It "Should throw for -MaskBits <Label> rather than treating it as /0" -ForEach @(
+        @{ Label = '$null'; MaskBits = $null }
+        @{ Label = "''"; MaskBits = '' }
+        @{ Label = "' '"; MaskBits = ' ' }
+        @{ Label = '33'; MaskBits = 33 }
+    ) {
+        { Get-SubnetHostAddress -IP 10.1.2.3 -MaskBits $MaskBits -ErrorAction Stop } | Should -Throw '*is not a valid subnet mask*'
+    }
+
+    It 'Should throw for an invalid MaskBits on a piped object' {
+        { [pscustomobject]@{ IPAddress = '10.1.2.3'; MaskBits = 'abc' } | Get-SubnetHostAddress -ErrorAction Stop } | Should -Throw '*is not a valid subnet mask*'
+    }
+
+    It 'Should write a non-terminating error for invalid input and carry on with the rest of the pipeline' {
+        $Result = '10.1.2.0/30', 'blah', '10.1.2.4/33', '10.1.2.4/30' | Get-SubnetHostAddress -AsString -ErrorAction SilentlyContinue -ErrorVariable Errors
+
+        $Result | Should -Be @('10.1.2.1', '10.1.2.2', '10.1.2.5', '10.1.2.6')
+        $Errors | Should -HaveCount 2
+        $Errors[0].Exception.Message | Should -BeLike "*'blah' is not a valid IPv4 address*"
+        $Errors[1].Exception.Message | Should -BeLike "*'10.1.2.4/33' does not have a valid subnet mask*"
+    }
+
+    It 'Should accept an [ipaddress] object as -IP' {
+        Get-SubnetHostAddress -IP ([ipaddress]'1.2.3.4') -MaskBits 30 -AsString | Should -Be @('1.2.3.5', '1.2.3.6')
+        [ipaddress]'1.2.3.4' | Get-SubnetHostAddress -MaskBits 30 -AsString | Should -Be @('1.2.3.5', '1.2.3.6')
+    }
+
+    It 'Should reject an IPv6 [ipaddress] object' {
+        { Get-SubnetHostAddress -IP ([ipaddress]'::1') -MaskBits 30 -ErrorAction Stop } | Should -Throw "*'::1' is not a valid IPv4 address*"
     }
 
     It 'Should always calculate and return host addresses, even for a subnet larger than /16' {
