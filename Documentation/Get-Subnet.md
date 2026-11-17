@@ -6,7 +6,7 @@ Returns subnet details for the local IP address, or a given network address and 
 ## SYNTAX
 
 ```
-Get-Subnet [[-IP] <String>] [[-MaskBits] <Int32>] [-Force] [-ProgressAction <ActionPreference>]
+Get-Subnet [[-IP] <String>] [[-MaskBits] <Object>] [-Force] [-ProgressAction <ActionPreference>]
  [<CommonParameters>]
 ```
 
@@ -72,13 +72,13 @@ Accept wildcard characters: False
 The numerical representation of the subnet mask.
 
 ```yaml
-Type: Int32
+Type: Object
 Parameter Sets: (All)
 Aliases: CIDR
 
 Required: False
 Position: 2
-Default value: 0
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

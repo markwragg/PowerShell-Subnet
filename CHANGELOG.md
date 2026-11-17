@@ -1,6 +1,6 @@
 # Change Log
 
-## !Deploy 2.0.0
+## [2.0.0] - 2026-11-17
 
 This release makes input validation stricter and changes some results. The `[Breaking]` entries below may need changes to existing scripts.
 

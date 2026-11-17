@@ -7,7 +7,7 @@ address and mask.
 ## SYNTAX
 
 ```
-Get-SubnetHostAddress [[-IP] <Object>] [[-MaskBits] <Int32>] [-AsString] [-ProgressAction <ActionPreference>]
+Get-SubnetHostAddress [-IP] <Object> [[-MaskBits] <Object>] [-AsString] [-ProgressAction <ActionPreference>]
  [<CommonParameters>]
 ```
 
@@ -17,6 +17,11 @@ regardless of subnet size, since that's this cmdlet's only job.
 It still warns (but does not
 refuse) when the subnet is larger than /16, since generating the full list for a very large
 subnet can take some time.
+
+If no mask is specified (either via slash notation or -MaskBits), one is inferred from the
+address class (/8 for Class A, /16 for Class B, /24 for Class C) and a warning is shown.
+Be
+aware that for a Class A or B address this can mean a very large number of addresses.
 
 ## EXAMPLES
 
@@ -78,7 +83,7 @@ Type: Object
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 1
 Default value: None
 Accept pipeline input: True (ByValue)
@@ -89,13 +94,13 @@ Accept wildcard characters: False
 The numerical representation of the subnet mask.
 
 ```yaml
-Type: Int32
+Type: Object
 Parameter Sets: (All)
 Aliases: CIDR
 
 Required: False
 Position: 2
-Default value: 0
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

@@ -10,7 +10,15 @@ Test-PrivateIP [-IP] <String> [-ProgressAction <ActionPreference>] [<CommonParam
 ```
 
 ## DESCRIPTION
-Returns $true or $false for a given IP address string depending on whether or not is is within the private IP address ranges.
+Returns $true or $false for a given IP address string depending on whether or not it is within the
+RFC 1918 private IP address ranges (10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16) or the loopback
+range (127.0.0.0/8, RFC 1122).
+
+Loopback is not an RFC 1918 range, but has always been included here for compatibility.
+Note that
+an address that isn't private is not necessarily public (e.g.
+link-local or carrier-grade NAT
+addresses), so use Test-PublicIP to test for that.
 
 ## EXAMPLES
 
